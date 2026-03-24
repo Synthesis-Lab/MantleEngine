@@ -8,3 +8,4 @@ license = "MIT"
 
 [dependencies]
 rhai = "1.19.0"
+glam = "0.29"
