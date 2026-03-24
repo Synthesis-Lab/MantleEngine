@@ -1,0 +1,10 @@
+[package]
+name = "mantle-engine"
+version = "0.1.0"
+authors = ["Synthesis Lab <info@synthesis-lab.com>"]
+edition = "2021"
+description = "High-performance, multi-layered Rust game engine by Synthesis Lab."
+license = "MIT"
+
+[dependencies]
+rhai = "1.19.0"
