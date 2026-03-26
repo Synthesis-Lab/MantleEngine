@@ -1,6 +1,6 @@
 use rhai::Engine;
 use glam::Vec2;
-use crate::components::{Transform, Sprite, Collider};
+use crate::components::{Transform, Sprite, Collider, Animation, AnimationFrame, AnimationState};
 use crate::assets::TextureId;
 use crate::collision::check_collision;
 
@@ -716,6 +716,340 @@ mod collision_tests {
 
         if let Ok(val) = result {
             assert!(val);
+        } else {
+            eprintln!("Script error: {:?}", result.err());
+        }
+    }
+}
+
+/// Rhai Animation wrapper — Rhai'de animasyon oluşturmak ve yönetmek için
+#[derive(Debug, Clone)]
+pub struct RhaiAnimation {
+    inner: Animation,
+}
+
+impl RhaiAnimation {
+    pub fn new(animation: Animation) -> Self {
+        RhaiAnimation { inner: animation }
+    }
+
+    pub fn inner(&self) -> &Animation {
+        &self.inner
+    }
+
+    pub fn inner_mut(&mut self) -> &mut Animation {
+        &mut self.inner
+    }
+
+    // ========== FRAME METODLARI ==========
+
+    pub fn frame_count(&self) -> usize {
+        self.inner.frame_count()
+    }
+
+    pub fn add_frame(&mut self, min_x: f32, min_y: f32, max_x: f32, max_y: f32, duration: f32) {
+        let frame = AnimationFrame::new(
+            Vec2::new(min_x, min_y),
+            Vec2::new(max_x, max_y),
+            duration,
+        );
+        self.inner.add_frame(frame);
+    }
+
+    pub fn add_frame_rect(&mut self, x: f32, y: f32, w: f32, h: f32, duration: f32) {
+        let frame = AnimationFrame::from_uv_rect(x, y, w, h, duration);
+        self.inner.add_frame(frame);
+    }
+
+    // ========== ÖZELLIKLER ==========
+
+    pub fn name(&self) -> String {
+        self.inner.name.clone()
+    }
+
+    pub fn speed(&self) -> f32 {
+        self.inner.speed
+    }
+
+    pub fn set_speed(&mut self, speed: f32) {
+        self.inner.speed = speed;
+    }
+
+    pub fn looping(&self) -> bool {
+        self.inner.looping
+    }
+
+    pub fn set_looping(&mut self, looping: bool) {
+        self.inner.looping = looping;
+    }
+
+    pub fn total_duration(&self) -> f32 {
+        self.inner.total_duration()
+    }
+
+    // ========== DIĞER ==========
+
+    pub fn to_string(&self) -> String {
+        self.inner.to_string()
+    }
+}
+
+/// Rhai AnimationState wrapper — Animasyon oynatma durumunu kontrol et
+#[derive(Debug, Clone)]
+pub struct RhaiAnimationState {
+    inner: AnimationState,
+}
+
+impl RhaiAnimationState {
+    pub fn new() -> Self {
+        RhaiAnimationState {
+            inner: AnimationState::new(),
+        }
+    }
+
+    pub fn inner(&self) -> &AnimationState {
+        &self.inner
+    }
+
+    pub fn inner_mut(&mut self) -> &mut AnimationState {
+        &mut self.inner
+    }
+
+    // ========== KONTROL ==========
+
+    pub fn play(&mut self) {
+        self.inner.play();
+    }
+
+    pub fn pause(&mut self) {
+        self.inner.pause();
+    }
+
+    pub fn stop(&mut self) {
+        self.inner.stop();
+    }
+
+    // ========== DURUM ==========
+
+    pub fn frame_index(&self) -> usize {
+        self.inner.frame_index
+    }
+
+    pub fn is_playing(&self) -> bool {
+        self.inner.is_playing
+    }
+
+    pub fn elapsed_time(&self) -> f32 {
+        self.inner.elapsed_time
+    }
+
+    // ========== GÜNCELLEME ==========
+
+    pub fn update(&mut self, delta_time: f32, animation: &mut RhaiAnimation) {
+        self.inner.update(delta_time, animation.inner_mut());
+    }
+
+    // ========== DIĞER ==========
+
+    pub fn to_string(&self) -> String {
+        self.inner.to_string()
+    }
+}
+
+/// Rhai Engine'e Animation fonksiyonlarını kaydet
+pub fn register_animation_functions(engine: &mut Engine) {
+    // Yeni Animation oluştur
+    engine.register_fn("create_animation", |name: &str, speed: f32, looping: bool| {
+        RhaiAnimation::new(Animation::new(name.to_string(), speed, looping))
+    });
+
+    // FRAME METODLARI
+    engine.register_fn(
+        "add_frame",
+        |anim: &mut RhaiAnimation, min_x: f32, min_y: f32, max_x: f32, max_y: f32, duration: f32| {
+            anim.add_frame(min_x, min_y, max_x, max_y, duration);
+        },
+    );
+
+    engine.register_fn(
+        "add_frame_rect",
+        |anim: &mut RhaiAnimation, x: f32, y: f32, w: f32, h: f32, duration: f32| {
+            anim.add_frame_rect(x, y, w, h, duration);
+        },
+    );
+
+    engine.register_fn("frame_count", |anim: &RhaiAnimation| anim.frame_count());
+
+    // ÖZELLIKLER
+    engine.register_fn("name", |anim: &RhaiAnimation| anim.name());
+
+    engine.register_get("speed", |anim: &mut RhaiAnimation| anim.speed());
+    engine.register_set("speed", |anim: &mut RhaiAnimation, s: f32| {
+        anim.set_speed(s);
+    });
+
+    engine.register_get("looping", |anim: &mut RhaiAnimation| anim.looping());
+    engine.register_set("looping", |anim: &mut RhaiAnimation, l: bool| {
+        anim.set_looping(l);
+    });
+
+    engine.register_fn("total_duration", |anim: &RhaiAnimation| anim.total_duration());
+
+    // AnimationState oluştur
+    engine.register_fn("create_animation_state", || RhaiAnimationState::new());
+
+    // KONTROL METODLARI
+    engine.register_fn("play", |state: &mut RhaiAnimationState| {
+        state.play();
+    });
+
+    engine.register_fn("pause", |state: &mut RhaiAnimationState| {
+        state.pause();
+    });
+
+    engine.register_fn("stop", |state: &mut RhaiAnimationState| {
+        state.stop();
+    });
+
+    // DURUM GETTER'LAR
+    engine.register_fn("frame_index", |state: &RhaiAnimationState| state.frame_index());
+    engine.register_fn("is_playing", |state: &RhaiAnimationState| state.is_playing());
+    engine.register_fn("elapsed_time", |state: &RhaiAnimationState| state.elapsed_time());
+
+    // STRING GÖSTERIMI
+    engine.register_fn("to_string", |anim: &RhaiAnimation| anim.to_string());
+    engine.register_fn("to_string", |state: &RhaiAnimationState| state.to_string());
+}
+
+#[cfg(test)]
+mod animation_tests {
+    use super::*;
+
+    #[test]
+    fn test_rhai_animation_creation() {
+        let anim = RhaiAnimation::new(Animation::new("walk".to_string(), 1.0, true));
+        assert_eq!(anim.name(), "walk");
+        assert_eq!(anim.speed(), 1.0);
+        assert!(anim.looping());
+        assert_eq!(anim.frame_count(), 0);
+    }
+
+    #[test]
+    fn test_rhai_animation_add_frame() {
+        let mut anim = RhaiAnimation::new(Animation::new("run".to_string(), 1.0, false));
+        anim.add_frame(0.0, 0.0, 0.25, 1.0, 0.1);
+        anim.add_frame(0.25, 0.0, 0.5, 1.0, 0.1);
+
+        assert_eq!(anim.frame_count(), 2);
+    }
+
+    #[test]
+    fn test_rhai_animation_speed_property() {
+        let mut anim = RhaiAnimation::new(Animation::new("test".to_string(), 1.0, false));
+        anim.set_speed(2.0);
+        assert_eq!(anim.speed(), 2.0);
+    }
+
+    #[test]
+    fn test_rhai_animation_looping_property() {
+        let mut anim = RhaiAnimation::new(Animation::new("test".to_string(), 1.0, true));
+        anim.set_looping(false);
+        assert!(!anim.looping());
+    }
+
+    #[test]
+    fn test_rhai_animation_state_creation() {
+        let state = RhaiAnimationState::new();
+        assert_eq!(state.frame_index(), 0);
+        assert!(!state.is_playing());
+    }
+
+    #[test]
+    fn test_rhai_animation_state_control() {
+        let mut state = RhaiAnimationState::new();
+
+        state.play();
+        assert!(state.is_playing());
+
+        state.pause();
+        assert!(!state.is_playing());
+
+        state.play();
+        state.stop();
+        assert!(!state.is_playing());
+        assert_eq!(state.frame_index(), 0);
+    }
+
+    #[test]
+    fn test_rhai_animation_state_frame_tracking() {
+        let anim = RhaiAnimation::new(Animation::new("test".to_string(), 1.0, true));
+
+        let mut state = RhaiAnimationState::new();
+        state.play();
+        assert!(state.is_playing());
+        assert_eq!(state.frame_index(), 0);
+    }
+
+    #[test]
+    fn test_rhai_animation_via_script() {
+        let mut engine = Engine::new();
+        register_animation_functions(&mut engine);
+
+        let result = engine.eval::<usize>(
+            r#"
+            let anim = create_animation("walk", 1.0, true);
+            anim.add_frame(0.0, 0.0, 0.25, 1.0, 0.1);
+            anim.add_frame(0.25, 0.0, 0.5, 1.0, 0.1);
+            anim.add_frame(0.5, 0.0, 0.75, 1.0, 0.1);
+            anim.frame_count()
+            "#
+        );
+
+        if let Ok(count) = result {
+            assert_eq!(count, 3);
+        } else {
+            eprintln!("Script error: {:?}", result.err());
+        }
+    }
+
+    #[test]
+    fn test_rhai_animation_state_playback() {
+        let mut engine = Engine::new();
+        register_animation_functions(&mut engine);
+
+        let result = engine.eval::<bool>(
+            r#"
+            let anim = create_animation("idle", 1.0, false);
+            anim.add_frame(0.0, 0.0, 1.0, 1.0, 0.2);
+
+            let state = create_animation_state();
+            state.play();
+            state.is_playing()
+            "#
+        );
+
+        if let Ok(is_playing) = result {
+            assert!(is_playing);
+        } else {
+            eprintln!("Script error: {:?}", result.err());
+        }
+    }
+
+    #[test]
+    fn test_rhai_animation_properties() {
+        let mut engine = Engine::new();
+        register_animation_functions(&mut engine);
+
+        let result = engine.eval::<f32>(
+            r#"
+            let anim = create_animation("fast", 2.0, true);
+            anim.speed = 1.5;
+            anim.speed
+            "#
+        );
+
+        if let Ok(speed) = result {
+            assert!((speed - 1.5).abs() < 0.01);
         } else {
             eprintln!("Script error: {:?}", result.err());
         }

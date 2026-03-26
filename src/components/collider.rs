@@ -1,7 +1,8 @@
 use glam::Vec2;
+use bevy_ecs::component::Component;
 
 /// Collision şeklini tanımla: AABB veya Daire
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Component)]
 pub enum Collider {
     /// Axis-Aligned Bounding Box: x, y, width, height
     Aabb {
@@ -37,8 +38,8 @@ impl Collider {
     pub fn set_aabb_position(&mut self, x: f32, y: f32) {
         match self {
             Collider::Aabb {
-                x: ref mut cx,
-                y: ref mut cy,
+                x: cx,
+                y: cy,
                 ..
             } => {
                 *cx = x;
@@ -52,8 +53,8 @@ impl Collider {
     pub fn set_circle_position(&mut self, x: f32, y: f32) {
         match self {
             Collider::Circle {
-                x: ref mut cx,
-                y: ref mut cy,
+                x: cx,
+                y: cy,
                 ..
             } => {
                 *cx = x;
@@ -67,8 +68,8 @@ impl Collider {
     pub fn set_aabb_size(&mut self, width: f32, height: f32) {
         match self {
             Collider::Aabb {
-                width: ref mut w,
-                height: ref mut h,
+                width: w,
+                height: h,
                 ..
             } => {
                 *w = width;
@@ -81,7 +82,7 @@ impl Collider {
     /// Daire yarıçapını değiştir
     pub fn set_circle_radius(&mut self, radius: f32) {
         match self {
-            Collider::Circle { radius: ref mut r, .. } => *r = radius,
+            Collider::Circle { radius: r, .. } => *r = radius,
             _ => {}
         }
     }

@@ -2,10 +2,11 @@
 name = "mantle-engine"
 version = "0.1.0"
 authors = ["Synthesis Lab <info@synthesis-lab.com>"]
-edition = "2021"
+edition = "2024"
 description = "High-performance, multi-layered Rust game engine by Synthesis Lab."
 license = "MIT"
 
 [dependencies]
 rhai = "1.19.0"
 glam = "0.29"
+bevy_ecs = "0.13"

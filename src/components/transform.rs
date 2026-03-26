@@ -1,13 +1,14 @@
 use glam::Vec2;
 use std::f32::consts::PI;
+use bevy_ecs::component::Component;
 
 /// 2D Transform Component — Konum, Rotasyon ve Ölçekleme
 /// 
 /// # Notlar
 /// - Rotasyon: Euler açı cinsinden (derece)
 /// - Ölçek: Vec2 (2D), 3D geçişine hazırlık için z alanı reserved
-/// - Z eksenil 3D desteği için şimdiden struct'ta yer alıyor ama şimdilik "reserved"
-#[derive(Debug, Clone, Copy, PartialEq)]
+/// - Z eksenel 3D desteği için şimdiden struct'ta yer alıyor ama şimdilik "reserved"
+#[derive(Debug, Clone, Copy, PartialEq, Component)]
 pub struct Transform {
     /// 2D Konum (x, y)
     position: Vec2,

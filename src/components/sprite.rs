@@ -1,5 +1,6 @@
 use glam::Vec2;
 use crate::assets::TextureId;
+use bevy_ecs::component::Component;
 
 /// Sprite Component — 2D görsel temsili
 ///
@@ -14,7 +15,7 @@ use crate::assets::TextureId;
 /// let sp = Sprite::new(TextureId::new(0), 64.0, 64.0);
 /// // TextureId 0 ile 64x64 sprite oluştur
 /// ```
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Component)]
 pub struct Sprite {
     /// Texture ID
     texture_id: TextureId,

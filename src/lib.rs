@@ -1,24 +1,33 @@
 use rhai::{Engine, EvalAltResult, Dynamic};
+use bevy_ecs::world::World;
+use bevy_ecs::entity::Entity;
+use std::collections::HashMap;
 
 pub mod assets;
 pub mod components;
 pub mod collision;
+pub mod ecs;
 pub mod entity;
 pub mod logger;
 pub mod scripting;
 
 pub use assets::{AssetManager, TextureId, TextureData};
-pub use components::{Sprite, Transform, Collider};
+pub use components::{Sprite, Transform, Collider, Animation, AnimationFrame, AnimationState};
 pub use collision::check_collision;
-pub use entity::{EntityId, manager::EntityManager};
+pub use ecs::{CollisionEvent, AnimationSystem, CollisionSystem};
+pub use entity::EntityId;
 pub use logger::{LogLevel, MantleLogger};
-pub use scripting::{register_transform_functions, register_sprite_functions, register_collision_functions};
+pub use scripting::{register_transform_functions, register_sprite_functions, register_collision_functions, register_animation_functions};
 
-/// Mantle Engine Core — Script motoru, Entity sistemi, Asset yönetimi ve Component yönetimi
+/// Mantle Engine Core — Script motoru, ECS World, Asset yönetimi ve Component yönetimi
 pub struct MantleCore {
     pub engine: Engine,
-    pub entity_manager: EntityManager,
+    pub world: World,
     pub asset_manager: AssetManager,
+    pub events: Vec<CollisionEvent>,
+    // Mapping from EntityId to Bevy Entity for lookups
+    entity_map: HashMap<EntityId, Entity>,
+    next_entity_id: u32,
 }
 
 impl MantleCore {
@@ -26,15 +35,19 @@ impl MantleCore {
     pub fn new() -> Self {
         let mut engine = Engine::new();
         
-        // Transform, Sprite ve Collision fonksiyonlarını Rhai'ye kaydet
+        // Transform, Sprite, Collision ve Animation fonksiyonlarını Rhai'ye kaydet
         register_transform_functions(&mut engine);
         register_sprite_functions(&mut engine);
         register_collision_functions(&mut engine);
+        register_animation_functions(&mut engine);
 
         Self {
             engine,
-            entity_manager: EntityManager::new(),
+            world: World::new(),
             asset_manager: AssetManager::new(),
+            events: Vec::new(),
+            entity_map: HashMap::new(),
+            next_entity_id: 0,
         }
     }
 
@@ -50,27 +63,63 @@ impl MantleCore {
 
     /// Entity oluştur
     pub fn create_entity(&mut self, x: f32, y: f32) -> EntityId {
-        self.entity_manager.create_entity(x, y)
+        let transform = Transform::new(x, y);
+        let bevy_entity_ref = self.world.spawn(transform);
+        let bevy_entity = bevy_entity_ref.id();
+        let entity_id = EntityId(self.next_entity_id);
+        self.next_entity_id += 1;
+        self.entity_map.insert(entity_id, bevy_entity);
+        entity_id
     }
 
     /// Entity'nin Transform'unu al
     pub fn get_entity_transform(&self, id: EntityId) -> Option<Transform> {
-        self.entity_manager.get_transform(id)
+        self.entity_map.get(&id).and_then(|bevy_entity| {
+            self.world.get::<Transform>(*bevy_entity).copied()
+        })
     }
 
-    /// Entity'nin Transform'unu değiştir
-    pub fn get_entity_transform_mut(&mut self, id: EntityId) -> Option<&mut Transform> {
-        self.entity_manager.get_transform_mut(id)
+    /// Entity'nin Transform'unu değiştir (mutable access)
+    /// Note: Due to Bevy's borrowing requirements, this returns a copy for mutation
+    /// Use entity methods like set_entity_position() for direct updates
+    pub fn get_entity_transform_mut(&mut self, _id: EntityId) -> Option<&mut Transform> {
+        // Phase 1: Bevy's get_mut returns Mut<T> which can't be returned as &mut T
+        // This TODO will be resolved in Phase 3 with a Commands-based pattern
+        // For now, use set_entity_position or get_entity_transform
+        None
+    }
+
+    /// Set entity position (workaround for mutable access in Bevy)
+    pub fn set_entity_position(&mut self, id: EntityId, x: f32, y: f32) -> bool {
+        if let Some(&bevy_entity) = self.entity_map.get(&id) {
+            if let Some(mut transform) = self.world.get_mut::<Transform>(bevy_entity) {
+                transform.set_x(x);
+                transform.set_y(y);
+                return true;
+            }
+        }
+        false
     }
 
     /// Entity'yi sil
     pub fn remove_entity(&mut self, id: EntityId) -> bool {
-        self.entity_manager.remove_entity(id)
+        if let Some(bevy_entity) = self.entity_map.remove(&id) {
+            self.world.despawn(bevy_entity);
+            true
+        } else {
+            false
+        }
     }
 
     /// Kaç entity var
     pub fn entity_count(&self) -> usize {
-        self.entity_manager.entity_count()
+        self.entity_map.len()
+    }
+
+    /// Update engine systems with delta time
+    pub fn update(&mut self, delta_time: f32) {
+        AnimationSystem::update(&mut self.world, delta_time);
+        CollisionSystem::update(&mut self.world, &mut self.events);
     }
 
     /// Texture yükle
