@@ -188,7 +188,7 @@ impl RenderSystem {
     }
 
     /// Convenience method to add a transform from simple parameters
-    pub fn add_transform_simple(&mut self, id: u64, x: f32, y: f32) {
+    pub fn add_transform_simple(&mut self, _id: u64, x: f32, y: f32) {
         let packet = TransformPacket {
             x,
             y,
@@ -201,25 +201,14 @@ impl RenderSystem {
     }
 
     /// Convenience method to add a sprite from simple parameters
-    pub fn add_sprite_simple(&mut self, id: u64, texture_name: &str) {
-        let packet = SpritePacket {
-            texture: [0; 64], // Would normally contain texture path hash/ID
-            color_r: 1.0,
-            color_g: 1.0,
-            color_b: 1.0,
-            color_a: 1.0,
-        };
+    pub fn add_sprite_simple(&mut self, _id: u64, _texture_name: &str) {
+        let packet = SpritePacket::new(1, 64.0, 64.0);
         self.current_frame.add_sprite(packet);
     }
 
     /// Convenience method to add a collider from simple parameters
-    pub fn add_collider_simple(&mut self, id: u64, width: f32, height: f32) {
-        let packet = ColliderPacket {
-            width,
-            height,
-            color: 0xFF00FF00u32, // Debug green
-            is_trigger: 0,
-        };
+    pub fn add_collider_simple(&mut self, _id: u64, width: f32, height: f32) {
+        let packet = ColliderPacket::aabb(0.0, 0.0, width, height);
         self.current_frame.add_collider(packet);
     }
 }
@@ -231,7 +220,7 @@ impl Default for RenderSystem {
 }
 
 /// Statistics about render frame
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct RenderStats {
     pub frame_number: u64,
     pub transform_count: usize,
