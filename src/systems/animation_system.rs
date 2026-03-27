@@ -231,13 +231,13 @@ mod tests {
         track.play();
 
         // Double speed = progresses twice as fast
-        // elapsed = 0 + 0.1 * 2.0 = 0.2, which is >= 0.1 (frame_duration), so frame advances
+        // elapsed = 0 + 0.1 * 2.0 = 0.2 = 2 frames worth
         track.update(0.1);
-        assert_eq!(track.current_frame, 1); // 0.2 >= 0.1, so frame advances to 1
+        assert_eq!(track.current_frame, 2); // Two frames advance: 0->1, then 1->2
         
-        // elapsed = 0.1 (remaining) + 0.05*2 = 0.2 >= 0.1, so frame advances again
+        // elapsed = 0 + 0.05*2.0 = 0.1 = 1 frame worth
         track.update(0.05);
-        assert_eq!(track.current_frame, 2); // elapsed = 0.2, frame advances to 2
+        assert_eq!(track.current_frame, 3); // One more frame: 2->3
     }
 
     #[test]
