@@ -14,6 +14,9 @@ pub mod scene;
 pub mod scripting;
 pub mod systems;
 
+#[cfg(test)]
+mod phase5_plus_tests;
+
 pub use assets::{AssetManager, TextureId, TextureData};
 pub use components::{Sprite, Transform, Collider, Animation, AnimationFrame, AnimationState};
 pub use collision::check_collision;
