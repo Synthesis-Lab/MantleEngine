@@ -89,4 +89,33 @@ void vkDestroyPipeline(VkDevice device, void* pipeline, const void* pAllocator);
 typedef struct VkShaderModule_T* VkShaderModule;
 typedef struct VkPipelineLayout_T* VkPipelineLayout;
 
+// Phase 5c functions (command buffer recording & rendering)
+VkResult vkBeginCommandBuffer(void* commandBuffer, const void* pBeginInfo);
+VkResult vkEndCommandBuffer(void* commandBuffer);
+VkResult vkAllocateCommandBuffers(VkDevice device, const void* pAllocateInfo, void* pCommandBuffers);
+VkResult vkFreeCommandBuffers(VkDevice device, VkCommandPool commandPool, uint32_t commandBufferCount, const void* const* pCommandBuffers);
+
+// Render pass commands
+VkResult vkCmdBeginRenderPass(void* commandBuffer, const void* pRenderPassBegin, uint32_t contents);
+VkResult vkCmdEndRenderPass(void* commandBuffer);
+
+// Pipeline commands
+VkResult vkCmdBindPipeline(void* commandBuffer, uint32_t pipelineBindPoint, void* pipeline);
+VkResult vkCmdDraw(void* commandBuffer, uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
+VkResult vkCmdSetViewport(void* commandBuffer, uint32_t firstViewport, uint32_t viewportCount, const void* pViewports);
+VkResult vkCmdSetScissor(void* commandBuffer, uint32_t firstScissor, uint32_t scissorCount, const void* pScissors);
+
+// Queue submission
+VkResult vkQueueSubmit(VkQueue queue, uint32_t submitCount, const void* pSubmits, void* fence);
+VkResult vkQueueWaitIdle(VkQueue queue);
+
+// Fence operations
+VkResult vkCreateFence(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pFence);
+void vkDestroyFence(VkDevice device, void* fence, const void* pAllocator);
+VkResult vkWaitForFences(VkDevice device, uint32_t fenceCount, const void* const* pFences, uint32_t waitAll, uint64_t timeout);
+VkResult vkResetFences(VkDevice device, uint32_t fenceCount, const void* const* pFences);
+
+// Phase 5c handle types
+typedef struct VkFence_T* VkFence;
+
 #endif // VULKAN_H_

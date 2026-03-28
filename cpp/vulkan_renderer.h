@@ -103,6 +103,10 @@ private:
     VkPipelineLayout pipeline_layout_;
     VkPipeline graphics_pipeline_;
     
+    // Phase 5c: Command buffers & Frame rendering
+    std::vector<VkCommandBuffer> command_buffers_;
+    VkFence render_fence_;
+    
     // Queue family indices
     uint32_t graphics_family_;
     uint32_t present_family_;
@@ -133,6 +137,13 @@ private:
     bool CreateGraphicsPipeline();
     VkShaderModule CreateShaderModule(const void* code, uint32_t size);
     void DestroyShaderModule(VkShaderModule module);
+    
+    // Phase 5c: Command buffer recording & frame submission
+    bool AllocateCommandBuffers();
+    bool CreateFence();
+    void DestroyFence();
+    bool RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t image_index);
+    bool SubmitFrame(uint32_t image_index);
     
     // Helper methods for rendering
     void RecordCommandBuffer(uint32_t image_index, const RenderPacket* packet);

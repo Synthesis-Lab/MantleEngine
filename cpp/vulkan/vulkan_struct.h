@@ -51,6 +51,9 @@ enum VkStructureType {
     VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION = 41,
     VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY = 42,
     VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO = 16,
+    VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO = 50,
+    VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO = 51,
+    VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO = 53,
 };
 
 // Queue flags
@@ -505,5 +508,86 @@ typedef struct {
     void* basePipelineHandle; // VkPipeline
     int32_t basePipelineIndex;
 } VkGraphicsPipelineCreateInfo;
+
+// Phase 5c: Command Buffer Recording & Submission
+
+// Subpass contents (how commands are recorded)
+enum VkSubpassContents {
+    VK_SUBPASS_CONTENTS_INLINE = 0,
+    VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS = 1,
+};
+
+// Command buffer usage flags
+enum VkCommandBufferUsageFlagBits {
+    VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT = 0x00000001,
+    VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT = 0x00000002,
+    VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT = 0x00000004,
+};
+
+// Command buffer allocate info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    void* commandPool;  // VkCommandPool
+    uint32_t level;     // VkCommandBufferLevel
+    uint32_t commandBufferCount;
+} VkCommandBufferAllocateInfo;
+
+// Command buffer begin info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    const void* pInheritanceInfo;
+} VkCommandBufferBeginInfo;
+
+// Clear color value
+typedef union {
+    float float32[4];
+    int32_t int32[4];
+    uint32_t uint32[4];
+} VkClearColorValue;
+
+// Clear value (color or depth/stencil)
+typedef union {
+    VkClearColorValue color;
+    struct {
+        float depth;
+        uint32_t stencil;
+    } depthStencil;
+} VkClearValue;
+
+// Render pass begin info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    void* renderPass; // VkRenderPass
+    void* framebuffer; // VkFramebuffer
+    VkRect2D renderArea;
+    uint32_t clearValueCount;
+    const VkClearValue* pClearValues;
+} VkRenderPassBeginInfo;
+
+// Fence create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+} VkFenceCreateInfo;
+
+// Note: VkPipelineBindPoint already defined above (line ~249)
+
+// Submit info (for queue submission)
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t waitSemaphoreCount;
+    const void* const* pWaitSemaphores;
+    const uint32_t* pWaitDstStageMask;
+    uint32_t commandBufferCount;
+    const void* const* pCommandBuffers;
+    uint32_t signalSemaphoreCount;
+    const void* const* pSignalSemaphores;
+} VkSubmitInfo;
 
 #endif // VULKAN_STRUCT_H_

@@ -220,3 +220,113 @@ void vkDestroyPipeline(VkDevice device, void* pipeline, const void* pAllocator) 
         delete[] reinterpret_cast<char*>(pipeline);
     }
 }
+
+// Phase 5c: Command Buffer Recording & Rendering
+
+// Command buffer recording
+VkResult vkBeginCommandBuffer(void* commandBuffer, const void* pBeginInfo) {
+    // No-op in stub: command buffer recording simulated
+    return VK_SUCCESS;
+}
+
+VkResult vkEndCommandBuffer(void* commandBuffer) {
+    // No-op in stub: command buffer recording complete
+    return VK_SUCCESS;
+}
+
+VkResult vkAllocateCommandBuffers(VkDevice device, const void* pAllocateInfo, void* pCommandBuffers) {
+    if (pCommandBuffers) {
+        void** buffers = reinterpret_cast<void**>(pCommandBuffers);
+        // Allocate a dummy command buffer
+        buffers[0] = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+VkResult vkFreeCommandBuffers(VkDevice device, VkCommandPool commandPool, 
+                             uint32_t commandBufferCount, const void* const* pCommandBuffers) {
+    if (pCommandBuffers) {
+        const void* const* buffers = pCommandBuffers;
+        for (uint32_t i = 0; i < commandBufferCount; ++i) {
+            if (buffers[i]) {
+                delete[] reinterpret_cast<char*>(const_cast<void*>(buffers[i]));
+            }
+        }
+    }
+    return VK_SUCCESS;
+}
+
+// Render pass commands
+VkResult vkCmdBeginRenderPass(void* commandBuffer, const void* pRenderPassBegin, uint32_t contents) {
+    // No-op in stub: render pass recording simulated
+    return VK_SUCCESS;
+}
+
+VkResult vkCmdEndRenderPass(void* commandBuffer) {
+    // No-op in stub: render pass recording complete
+    return VK_SUCCESS;
+}
+
+// Pipeline commands
+VkResult vkCmdBindPipeline(void* commandBuffer, uint32_t pipelineBindPoint, void* pipeline) {
+    // No-op in stub: pipeline bind simulated
+    return VK_SUCCESS;
+}
+
+VkResult vkCmdDraw(void* commandBuffer, uint32_t vertexCount, uint32_t instanceCount, 
+                   uint32_t firstVertex, uint32_t firstInstance) {
+    // No-op in stub: draw call simulated
+    return VK_SUCCESS;
+}
+
+VkResult vkCmdSetViewport(void* commandBuffer, uint32_t firstViewport, 
+                         uint32_t viewportCount, const void* pViewports) {
+    // No-op in stub: viewport set simulated
+    return VK_SUCCESS;
+}
+
+VkResult vkCmdSetScissor(void* commandBuffer, uint32_t firstScissor, 
+                        uint32_t scissorCount, const void* pScissors) {
+    // No-op in stub: scissor set simulated
+    return VK_SUCCESS;
+}
+
+// Queue submission
+VkResult vkQueueSubmit(VkQueue queue, uint32_t submitCount, const void* pSubmits, void* fence) {
+    // No-op in stub: GPU submission simulated
+    // In real Vulkan, this would send commands to GPU for execution
+    return VK_SUCCESS;
+}
+
+VkResult vkQueueWaitIdle(VkQueue queue) {
+    // No-op in stub: wait simulated
+    // In real Vulkan, CPU blocks until GPU finishes all queued work
+    return VK_SUCCESS;
+}
+
+// Fence operations
+VkResult vkCreateFence(VkDevice device, const void* pCreateInfo, 
+                      const void* pAllocator, void* pFence) {
+    if (pFence) {
+        void** fence_ptr = reinterpret_cast<void**>(pFence);
+        *fence_ptr = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyFence(VkDevice device, void* fence, const void* pAllocator) {
+    if (fence) {
+        delete[] reinterpret_cast<char*>(fence);
+    }
+}
+
+VkResult vkWaitForFences(VkDevice device, uint32_t fenceCount, const void* const* pFences,
+                        uint32_t waitAll, uint64_t timeout) {
+    // No-op in stub: fence wait simulated
+    return VK_SUCCESS;
+}
+
+VkResult vkResetFences(VkDevice device, uint32_t fenceCount, const void* const* pFences) {
+    // No-op in stub: fence reset simulated
+    return VK_SUCCESS;
+}

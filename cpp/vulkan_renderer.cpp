@@ -135,6 +135,18 @@ bool VulkanRenderer::Initialize() {
         return false;
     }
     
+    // Phase 5c: Allocate command buffers for rendering
+    if (!AllocateCommandBuffers()) {
+        SetError("Failed to allocate command buffers");
+        return false;
+    }
+    
+    // Phase 5c: Create fence for frame synchronization
+    if (!CreateFence()) {
+        SetError("Failed to create render fence");
+        return false;
+    }
+    
     is_initialized_ = true;
     is_ready_ = true;
     frame_number_ = 0;
@@ -165,6 +177,12 @@ void VulkanRenderer::Shutdown() {
         vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
         pipeline_layout_ = nullptr;
     }
+    
+    // Phase 5c: Destroy render fence
+    DestroyFence();
+    
+    // Command buffers are freed automatically with command pool, just clear the vector
+    command_buffers_.clear();
     
     // Phase 5a: Destroy framebuffers
     for (auto framebuffer : framebuffers_) {
@@ -502,32 +520,224 @@ bool VulkanRenderer::CreateCommandPool() {
     return true;
 }
 
+// ============================================================================
+// Phase 5c: Command Buffer Recording & Frame Rendering Implementation
+// ============================================================================
+
+bool VulkanRenderer::AllocateCommandBuffers() {
+    // Phase 5c - Command Buffer Allocation
+    // Purpose: Allocate command buffers for recording render commands
+    //
+    // In this implementation, we allocate one command buffer per swapchain image
+    // to support double-buffering and prevent command buffer re-recording
+    
+    uint32_t num_buffers = swapchain_images_.size();
+    if (num_buffers == 0) {
+        SetError("No swapchain images available");
+        return false;
+    }
+    
+    command_buffers_.resize(num_buffers, nullptr);
+    
+    // Create command buffer allocation info
+    VkCommandBufferAllocateInfo alloc_info = {};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.commandPool = command_pool_;
+    alloc_info.level = 0;  // VK_COMMAND_BUFFER_LEVEL_PRIMARY
+    alloc_info.commandBufferCount = num_buffers;
+    
+    // Allocate command buffers (stub creates dummy handles)
+    VkResult result = vkAllocateCommandBuffers(device_, &alloc_info, command_buffers_.data());
+    if (result != VK_SUCCESS) {
+        SetError("Failed to allocate command buffers: %d", static_cast<int>(result));
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Allocated " << num_buffers << " command buffers (Phase 5c)" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreateFence() {
+    // Phase 5c - Fence Creation
+    // Purpose: Create a fence for GPU-CPU synchronization
+    //
+    // The fence signals when the GPU has finished processing submitted work
+    // allowing the CPU to safely begin preparing the next frame
+    
+    VkFenceCreateInfo fence_info = {};
+    fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_info.flags = 0;  // Fence starts in unsignaled state
+    
+    VkResult result = vkCreateFence(device_, &fence_info, nullptr, &render_fence_);
+    if (result != VK_SUCCESS) {
+        SetError("Failed to create render fence: %d", static_cast<int>(result));
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Render fence created (Phase 5c)" << std::endl;
+    return true;
+}
+
+void VulkanRenderer::DestroyFence() {
+    // Phase 5c - Fence Destruction
+    // Purpose: Clean up the synchronization fence
+    
+    if (render_fence_ != nullptr) {
+        vkDestroyFence(device_, render_fence_, nullptr);
+        render_fence_ = nullptr;
+    }
+}
+
+bool VulkanRenderer::RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t image_index) {
+    // Phase 5c - Render Command Recording
+    // Purpose: Record draw commands into command buffer
+    //
+    // This function records the actual rendering commands that will be executed on the GPU
+    
+    if (image_index >= framebuffers_.size()) {
+        SetError("Invalid framebuffer index: %u", image_index);
+        return false;
+    }
+    
+    // Setup clear color (black)
+    VkClearValue clear_color = {};
+    clear_color.color.float32[0] = 0.0f;  // R
+    clear_color.color.float32[1] = 0.0f;  // G
+    clear_color.color.float32[2] = 0.0f;  // B
+    clear_color.color.float32[3] = 1.0f;  // A
+    
+    // Begin render pass with clear operation
+    VkRenderPassBeginInfo render_pass_begin = {};
+    render_pass_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_begin.renderPass = render_pass_;
+    render_pass_begin.framebuffer = framebuffers_[image_index];
+    render_pass_begin.renderArea.offset = {0, 0};
+    render_pass_begin.renderArea.extent.width = swapchain_extent_.width;
+    render_pass_begin.renderArea.extent.height = swapchain_extent_.height;
+    render_pass_begin.clearValueCount = 1;
+    render_pass_begin.pClearValues = &clear_color;
+    
+    vkCmdBeginRenderPass(cmd_buffer, &render_pass_begin, VK_SUBPASS_CONTENTS_INLINE);
+    
+    // Bind graphics pipeline
+    vkCmdBindPipeline(cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
+    
+    // Draw fullscreen triangle (3 vertices, 1 instance, 0 indices)
+    // Positions are hardcoded in vertex shader
+    vkCmdDraw(cmd_buffer, 3, 1, 0, 0);
+    
+    // End render pass
+    vkCmdEndRenderPass(cmd_buffer);
+    
+    return true;
+}
+
+bool VulkanRenderer::SubmitFrame(uint32_t image_index) {
+    // Phase 5c - Frame Submission
+    // Purpose: Submit recorded command buffer to GPU queue
+    //
+    // This sends the command buffer to the graphics queue for execution
+    // In a real implementation, this would also handle synchronization with
+    // presentation and double-buffering
+    
+    if (image_index >= command_buffers_.size()) {
+        SetError("Invalid command buffer index: %u", image_index);
+        return false;
+    }
+    
+    VkCommandBuffer cmd_buffer = command_buffers_[image_index];
+    if (cmd_buffer == nullptr) {
+        SetError("Command buffer at index %u is null", image_index);
+        return false;
+    }
+    
+    // Setup submit info
+    VkSubmitInfo submit_info = {};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = reinterpret_cast<const void* const*>(&cmd_buffer);
+    submit_info.waitSemaphoreCount = 0;  // Phase 5c: No semaphore synchronization yet
+    submit_info.signalSemaphoreCount = 0;
+    
+    // Submit to graphics queue
+    VkResult result = vkQueueSubmit(graphics_queue_, 1, &submit_info, render_fence_);
+    if (result != VK_SUCCESS) {
+        SetError("Failed to submit command buffer to queue: %d", static_cast<int>(result));
+        return false;
+    }
+    
+    // Wait for GPU to finish this frame
+    // In Phase 5c, we use a simple blocking wait
+    // Phase 5d+ will use more sophisticated synchronization
+    result = vkQueueWaitIdle(graphics_queue_);
+    if (result != VK_SUCCESS) {
+        SetError("Queue wait failed: %d", static_cast<int>(result));
+        return false;
+    }
+    
+    return true;
+}
+
 void VulkanRenderer::RecordCommandBuffer(uint32_t image_index, const RenderPacket* packet) {
-    // Phase 5 - Command Buffer Recording
+    // Phase 5c - Complete Command Buffer Recording & Submission
+    // Purpose: Record rendering commands and submit frame to GPU
+    
+    if (!is_initialized_) {
+        SetError("Renderer not initialized");
+        return;
+    }
+    
+    if (image_index >= command_buffers_.size()) {
+        SetError("Invalid image index: %u", image_index);
+        return;
+    }
+    
+    VkCommandBuffer cmd_buffer = command_buffers_[image_index];
+    if (cmd_buffer == nullptr) {
+        SetError("Command buffer is null");
+        return;
+    }
+    
     // Step 1: Begin command buffer recording
-    //   - VkCommandBufferBeginInfo with VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
-    //   - vkBeginCommandBuffer(cmd_buffer_, &begin_info)
-    //
-    // Step 2: Begin render pass
-    //   - VkRenderPassBeginInfo with clear values (color, depth)
-    //   - vkCmdBeginRenderPass(cmd_buffer_, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE)
-    //
-    // Step 3: Bind graphics pipeline
-    //   - vkCmdBindPipeline(cmd_buffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_)
-    //
-    // Step 4: Set dynamic state
-    //   - vkCmdSetViewport(), vkCmdSetScissor()
-    //
-    // Step 5: Call rendering methods by type
-    //   - RenderTransforms(cmd_buffer_, packet)
-    //   - RenderSprites(cmd_buffer_, packet)
-    //   - RenderColliders(cmd_buffer_, packet)
-    //
-    // Step 6: End render pass
-    //   - vkCmdEndRenderPass(cmd_buffer_)
-    //
-    // Step 7: End command buffer
-    //   - vkEndCommandBuffer(cmd_buffer_)
+    VkCommandBufferBeginInfo begin_info = {};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;  // Can be submitted multiple times
+    
+    VkResult result = vkBeginCommandBuffer(cmd_buffer, &begin_info);
+    if (result != VK_SUCCESS) {
+        SetError("Failed to begin command buffer recording: %d", static_cast<int>(result));
+        return;
+    }
+    
+    // Step 2: Record rendering commands
+    if (!RecordRenderCommands(cmd_buffer, image_index)) {
+        SetError("Failed to record render commands");
+        vkEndCommandBuffer(cmd_buffer);
+        return;
+    }
+    
+    // Step 3: End command buffer recording
+    result = vkEndCommandBuffer(cmd_buffer);
+    if (result != VK_SUCCESS) {
+        SetError("Failed to end command buffer recording: %d", static_cast<int>(result));
+        return;
+    }
+    
+    // Step 4: Submit frame to GPU
+    if (!SubmitFrame(image_index)) {
+        SetError("Failed to submit frame");
+        return;
+    }
+    
+    // Frame successfully recorded and submitted
+    frame_number_++;
+    
+    if (packet) {
+        std::cout << "[MantleRenderer] Frame " << frame_number_ << " recorded with "
+                  << packet->transform_count << " transforms, "
+                  << packet->sprite_count << " sprites, "
+                  << packet->collider_count << " colliders" << std::endl;
+    }
 }
 
 void VulkanRenderer::RenderTransforms(VkCommandBuffer cmd_buffer, const RenderPacket* packet) {
