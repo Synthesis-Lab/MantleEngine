@@ -37,9 +37,17 @@ pub enum FFIError {
 /// - C++ caller must keep handle valid
 #[unsafe(no_mangle)]
 pub extern "C" fn mantle_renderer_init() -> RendererHandle {
-    // Phase 4: Will create actual C++ renderer instance
-    // For now, return valid handle
-    RendererHandle(0x1 as *mut c_void) // Non-null placeholder
+    // Phase 5e: Initialize the Vulkan renderer
+    match crate::ffi::cpp_bridge::init_vulkan_renderer() {
+        crate::ffi::FFIError::OK => {
+            // Get the renderer pointer that was just initialized
+            match crate::ffi::cpp_bridge::get_vulkan_renderer() {
+                Ok(renderer_ptr) => RendererHandle(renderer_ptr),
+                Err(_) => RendererHandle(std::ptr::null_mut()),
+            }
+        }
+        _ => RendererHandle(std::ptr::null_mut()), // Return null on error
+    }
 }
 
 /// Shutdown the renderer and free resources
@@ -82,12 +90,23 @@ pub extern "C" fn mantle_render_submit(
         return FFIError::InvalidPointer;
     }
     
-    // Safety: packet pointer is validated above
-    let _packet = unsafe { &*packet };
-    
-    // Phase 4: Pass to C++ renderer queue
-    // For now, just validate structure
-    FFIError::OK
+    // Phase 5e: Get renderer from global state and submit packet
+    match crate::ffi::cpp_bridge::get_vulkan_renderer() {
+        Ok(renderer_ptr) => {
+            // Verify handles match (safety check)
+            if renderer_ptr != handle.0 {
+                return FFIError::InternalError;
+            }
+            
+            // Safety: renderer_ptr is valid (from global state)
+            // packet pointer was validated above
+            unsafe {
+                crate::ffi::cpp_bridge::vulkan_renderer_submit_render_packet(renderer_ptr, packet);
+            }
+            FFIError::OK
+        }
+        Err(_) => FFIError::RendererNotInitialized,
+    }
 }
 
 /// Get renderer status
@@ -230,8 +249,22 @@ pub extern "C" fn mantle_wait_render(handle: RendererHandle) -> FFIError {
         return FFIError::RendererNotInitialized;
     }
     
-    // Phase 4: Will synchronize with C++ render thread
-    FFIError::OK
+    // Phase 5e: Synchronize with GPU (waits for vkQueueWaitIdle)
+    match crate::ffi::cpp_bridge::get_vulkan_renderer() {
+        Ok(renderer_ptr) => {
+            // Verify handles match (safety check)
+            if renderer_ptr != handle.0 {
+                return FFIError::InternalError;
+            }
+            
+            // Safety: renderer_ptr is valid, caller ensured it before this call
+            unsafe {
+                crate::ffi::cpp_bridge::vulkan_renderer_wait_render(renderer_ptr);
+            }
+            FFIError::OK
+        }
+        Err(_) => FFIError::RendererNotInitialized,
+    }
 }
 
 #[cfg(test)]

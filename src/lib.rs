@@ -71,7 +71,7 @@ impl MantleCore {
         register_collision_functions(&mut engine);
         register_animation_functions(&mut engine);
 
-        Self {
+        let core = Self {
             engine,
             world: World::new(),
             asset_manager: AssetManager::new(),
@@ -83,7 +83,20 @@ impl MantleCore {
             animation_system: Phase5AnimationSystem::new(),
             collision_system: Phase5CollisionSystem::new(),
             current_frame: 0,
+        };
+        
+        // Phase 5e: Initialize Vulkan renderer for real-time frame output
+        match ffi::cpp_bridge::init_vulkan_renderer() {
+            ffi::FFIError::OK => {
+                eprintln!("[MantleCore] Vulkan renderer initialized successfully (Phase 5e)");
+            }
+            err => {
+                eprintln!("[MantleCore] Failed to initialize Vulkan renderer: {:?}", err);
+                // Continue anyway; some applications may not need rendering
+            }
         }
+        
+        core
     }
 
     /// Script çalıştır
@@ -290,6 +303,22 @@ impl MantleCore {
         let render_stats = self.render_system.submit_frame();
         let collision_stats = self.collision_system.stats().clone();
 
+        // Phase 5e: Real-time GPU rendering pipeline
+        // Build render packet from ECS data
+        let render_packet = self.render_system.build_render_packet();
+        
+        // Get renderer handle
+        if let Ok(handle) = ffi::cpp_bridge::get_vulkan_renderer() {
+            // Submit packet to C++ renderer for GPU processing
+            let _ = ffi::c_abi::mantle_render_submit(
+                ffi::RendererHandle(handle),
+                &render_packet as *const _,
+            );
+            
+            // Wait for GPU to finish (vkQueueWaitIdle synchronization)
+            let _ = ffi::c_abi::mantle_wait_render(ffi::RendererHandle(handle));
+        }
+
         // Increment frame counter
         self.current_frame += 1;
 
@@ -367,6 +396,13 @@ impl MantleCore {
     /// Get collision system statistics
     pub fn collision_stats(&self) -> CollisionStats {
         self.collision_system.stats().clone()
+    }
+}
+
+// Phase 5e: Renderer cleanup on drop
+impl Drop for MantleCore {
+    fn drop(&mut self) {
+        ffi::cpp_bridge::shutdown_vulkan_renderer();
     }
 }
 

@@ -23,7 +23,7 @@ use std::ffi::c_void;
 
 /// Opaque handle to the C++ renderer instance
 #[repr(transparent)]
-pub struct RendererHandle(*mut c_void);
+pub struct RendererHandle(pub *mut c_void);
 
 impl RendererHandle {
     /// Create a null handle (renderer not initialized)
