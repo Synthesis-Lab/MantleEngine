@@ -15,15 +15,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Corrosion)
 
-# Cargo project (MantleEngine Rust)
-corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES mantle_engine)
-
-# C++ subproject (Vulkan Renderer)
+# C++ subproject (Vulkan Renderer) - Build first
 add_subdirectory(cpp)
 
-# Link C++ library with Rust FFI
+# Cargo project (MantleEngine Rust)
+corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES mantle-engine)
+
+# Link C++ library with Rust FFI if Rust target was created
 # The mantle_renderer C++ library is available for linking with Rust extern "C" FFI calls
-target_link_libraries(mantle_engine PRIVATE mantle_renderer)
+if(TARGET mantle-engine AND TARGET mantle_renderer)
+    target_link_libraries(mantle-engine PRIVATE mantle_renderer)
+endif()
 
 # Optional: Build examples or tests
 option(MANTLE_BUILD_EXAMPLES "Build example applications" OFF)

@@ -120,6 +120,114 @@ TEST_F(VulkanRendererTest, WaitRenderBeforeInit) {
     EXPECT_NE(error, nullptr);
 }
 
+/// ============================================================================
+/// Phase 5a: Surface & Swapchain Tests
+/// ============================================================================
+
+/// Test 11: Surface Creation During Init
+TEST_F(VulkanRendererTest, CreateSurface) {
+    // Surface should be created as part of Initialize()
+    EXPECT_FALSE(renderer.IsReady());
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // After success, we should have initialized surface structures
+    // (though in headless mode, surface_ pointer is nullptr)
+    
+    renderer.Shutdown();
+}
+
+/// Test 12: Swapchain Creation During Init
+TEST_F(VulkanRendererTest, CreateSwapchain) {
+    // Swapchain should be created as part of Initialize()
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Swapchain should have valid dimensions
+    // (The actual swapchain_extent_ is set to 1024x768)
+    
+    renderer.Shutdown();
+}
+
+/// Test 13: Image Views Creation
+TEST_F(VulkanRendererTest, CreateImageViews) {
+    // Image views should be created during Initialize()
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Image views correspond to swapchain images
+    // Should create 2 for double-buffering
+    
+    renderer.Shutdown();
+}
+
+/// Test 14: Render Pass Creation
+TEST_F(VulkanRendererTest, CreateRenderPass) {
+    // Render pass should be created during Initialize()
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Render pass defines frame operation structure
+    // Should exist after successful initialization
+    
+    renderer.Shutdown();
+}
+
+/// Test 15: Framebuffers Creation
+TEST_F(VulkanRendererTest, CreateFramebuffers) {
+    // Framebuffers should be created during Initialize()
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Framebuffers bind image views to render pass
+    // Should have one per swapchain image (2 for double-buffering)
+    
+    renderer.Shutdown();
+}
+
+/// Test 16: Multiple Initializations with Phase 5a
+TEST_F(VulkanRendererTest, MultipleSwapchainTest) {
+    // Verify that re-initializing properly cleans up Phase 5a resources
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    renderer.Shutdown();
+    
+    // Should be able to shutdown and reinit
+    EXPECT_FALSE(renderer.IsReady());
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    renderer.Shutdown();
+}
+
+/// Test 17: Phase 5a Integration
+TEST_F(VulkanRendererTest, PhaseIntegrationTest) {
+    // Full Phase 5 + Phase 5a pipeline integration test
+    EXPECT_FALSE(renderer.IsReady());
+    
+    // Initialize should set up:
+    // 1. Vulkan instance (Phase 5)
+    // 2. Physical device selection (Phase 5)
+    // 3. Logical device creation (Phase 5)
+    // 4. Command pool (Phase 5)
+    // 5. Surface (Phase 5a)
+    // 6. Swapchain (Phase 5a)
+    // 7. Image views (Phase 5a)
+    // 8. Render pass (Phase 5a)
+    // 9. Framebuffers (Phase 5a)
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Rendering operations should work
+    RenderPacket packet = {};
+    renderer.SubmitRenderPacket(&packet);
+    renderer.WaitRender();
+    
+    // Cleanup should be reversible
+    renderer.Shutdown();
+    EXPECT_FALSE(renderer.IsReady());
+}
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

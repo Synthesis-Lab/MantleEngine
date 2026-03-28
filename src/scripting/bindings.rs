@@ -982,7 +982,7 @@ mod animation_tests {
 
     #[test]
     fn test_rhai_animation_state_frame_tracking() {
-        let anim = RhaiAnimation::new(Animation::new("test".to_string(), 1.0, true));
+        let _anim = RhaiAnimation::new(Animation::new("test".to_string(), 1.0, true));
 
         let mut state = RhaiAnimationState::new();
         state.play();
