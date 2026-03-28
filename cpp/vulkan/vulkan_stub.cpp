@@ -383,3 +383,29 @@ VkResult vkCmdCopyImageToBuffer(void* commandBuffer, void* srcImage, uint32_t sr
     // Stub: GPU→CPU copy simulated
     return VK_SUCCESS;
 }
+
+void vkGetPhysicalDeviceMemoryProperties(VkPhysicalDevice physicalDevice, void* pMemoryProperties) {
+    // Stub: return dummy memory properties
+    if (pMemoryProperties) {
+        auto* memProps = reinterpret_cast<VkPhysicalDeviceMemoryProperties*>(pMemoryProperties);
+        memset(memProps, 0, sizeof(VkPhysicalDeviceMemoryProperties));
+        memProps->memoryTypeCount = 1;
+        memProps->memoryTypes[0].propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    }
+}
+
+void vkGetBufferMemoryRequirements(VkDevice device, void* buffer, void* pMemoryRequirements) {
+    // Stub: return dummy memory requirements
+    if (pMemoryRequirements) {
+        auto* memReqs = reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements);
+        memset(memReqs, 0, sizeof(VkMemoryRequirements));
+        memReqs->size = 1024; // Dummy size
+        memReqs->alignment = 256;
+        memReqs->memoryTypeBits = 1;
+    }
+}
+
+VkResult vkCmdCopyBuffer(void* commandBuffer, void* srcBuffer, void* dstBuffer, uint32_t regionCount, const void* pRegions) {
+    // Stub: buffer copy command recorded
+    return VK_SUCCESS;
+}

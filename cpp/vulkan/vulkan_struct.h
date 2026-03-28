@@ -648,4 +648,51 @@ typedef struct {
     } imageExtent;
 } VkBufferImageCopy;
 
+// Phase 5g: Memory structures for GPU allocation
+// Memory heap info
+typedef struct {
+    uint64_t size;
+    uint32_t flags;
+} VkMemoryHeap;
+
+// Memory type info
+typedef struct {
+    uint32_t propertyFlags;
+    uint32_t heapIndex;
+} VkMemoryType;
+
+// Memory requirements for buffer allocation
+typedef struct {
+    uint64_t size;
+    uint64_t alignment;
+    uint32_t memoryTypeBits;
+} VkMemoryRequirements;
+
+// Physical device memory properties
+typedef struct {
+    VkMemoryType memoryTypes[32];
+    uint32_t memoryTypeCount;
+    VkMemoryHeap memoryHeaps[16];
+    uint32_t memoryHeapCount;
+} VkPhysicalDeviceMemoryProperties;
+
+// Buffer copy region for vkCmdCopyBuffer
+typedef struct {
+    uint64_t srcOffset;
+    uint64_t dstOffset;
+    uint64_t size;
+} VkBufferCopy;
+
+// Buffer/device memory sharing mode enum
+enum VkSharingMode {
+    VK_SHARING_MODE_EXCLUSIVE = 0,
+    VK_SHARING_MODE_CONCURRENT = 1,
+};
+
+// Command buffer level enum
+enum VkCommandBufferLevel {
+    VK_COMMAND_BUFFER_LEVEL_PRIMARY = 0,
+    VK_COMMAND_BUFFER_LEVEL_SECONDARY = 1,
+};
+
 #endif // VULKAN_STRUCT_H_

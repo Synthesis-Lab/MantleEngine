@@ -177,7 +177,8 @@ private:
     bool CreatePlaceholderTexture();     // Create white texture fallback
     bool CreateTextureSampler();         // Create VkSampler for texture filtering
     
-    // Phase 5f: Buffer Helper Methods
+    // Phase 5g: Buffer Helper Methods
+    uint32_t FindMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties);
     bool CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, 
                      VkMemoryPropertyFlags properties,
                      VkBuffer& buffer, VkDeviceMemory& memory);

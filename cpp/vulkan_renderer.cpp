@@ -1289,6 +1289,36 @@ bool VulkanRenderer::SaveFrameToPPM(const char* filename, uint32_t width, uint32
 }
 
 // ============================================================================
+// Phase 5g: GPU Buffer Management (Implementation)
+// ============================================================================
+
+uint32_t VulkanRenderer::FindMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties) {
+    // Phase 5g - Find suitable memory type for buffer allocation
+    
+    VkPhysicalDeviceMemoryProperties mem_properties;
+    vkGetPhysicalDeviceMemoryProperties(physical_device_, &mem_properties);
+    
+    // Search through available memory types
+    for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
+        if ((type_filter & (1 << i)) && 
+            (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+    
+    // Fallback: if exact match not found, return first supported type
+    for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
+        if (type_filter & (1 << i)) {
+            SetError("WARNING: Memory type %u doesn't have requested properties", i);
+            return i;
+        }
+    }
+    
+    SetError("No suitable memory type found for allocation");
+    return 0;
+}
+
+// ============================================================================
 // Phase 5f: GPU Buffer Management (Stubs for Phase 5g Implementation)
 // ============================================================================
 
@@ -1341,22 +1371,118 @@ bool VulkanRenderer::CreateTextureSampler() {
 bool VulkanRenderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
                                   VkMemoryPropertyFlags properties,
                                   VkBuffer& buffer, VkDeviceMemory& memory) {
-    // Phase 5f Stub: Helper to create and allocate a VkBuffer
-    // TODO Phase 5g: Implement vkCreateBuffer() and vkAllocateMemory()
-    (void)size; (void)usage; (void)properties; (void)&buffer; (void)&memory;
+    // Phase 5g - Create and allocate a GPU buffer
+    
+    buffer = nullptr;
+    memory = nullptr;
+    
+    // Create VkBuffer
+    VkBufferCreateInfo buffer_info = {};
+    buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    buffer_info.size = size;
+    buffer_info.usage = usage;
+    buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    
+    if (vkCreateBuffer(device_, &buffer_info, nullptr, &buffer) != VK_SUCCESS) {
+        SetError("Failed to create VkBuffer (size: %zu bytes)", size);
+        return false;
+    }
+    
+    // Query memory requirements
+    VkMemoryRequirements mem_requirements;
+    vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
+    
+    // Find suitable memory type
+    uint32_t memory_type = FindMemoryType(mem_requirements.memoryTypeBits, properties);
+    
+    // Allocate GPU memory
+    VkMemoryAllocateInfo alloc_info = {};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = mem_requirements.size;
+    alloc_info.memoryTypeIndex = memory_type;
+    
+    if (vkAllocateMemory(device_, &alloc_info, nullptr, &memory) != VK_SUCCESS) {
+        SetError("Failed to allocate GPU memory (size: %zu bytes)", mem_requirements.size);
+        vkDestroyBuffer(device_, buffer, nullptr);
+        buffer = nullptr;
+        return false;
+    }
+    
+    // Bind memory to buffer
+    if (vkBindBufferMemory(device_, buffer, memory, 0) != VK_SUCCESS) {
+        SetError("Failed to bind buffer memory");
+        vkFreeMemory(device_, memory, nullptr);
+        vkDestroyBuffer(device_, buffer, nullptr);
+        memory = nullptr;
+        buffer = nullptr;
+        return false;
+    }
+    
     return true;
 }
 
 void VulkanRenderer::CopyBuffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
-    // Phase 5f Stub: Copy data between buffers using command buffer
-    // TODO Phase 5g: Implement vkCmdCopyBuffer()
-    (void)src_buffer; (void)dst_buffer; (void)size;
+    // Phase 5g - Copy data between GPU buffers\n    // Uses command buffer to record and execute copy operation
+    
+    // Allocate temporary command buffer for transfer
+    VkCommandBufferAllocateInfo alloc_info = {};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info.commandPool = command_pool_;
+    alloc_info.commandBufferCount = 1;
+    
+    VkCommandBuffer cmd_buffer;
+    if (vkAllocateCommandBuffers(device_, &alloc_info, (void**)&cmd_buffer) != VK_SUCCESS) {
+        SetError("Failed to allocate temporary command buffer for CopyBuffer");
+        return;
+    }
+    
+    // Begin recording commands
+    VkCommandBufferBeginInfo begin_info = {};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    
+    vkBeginCommandBuffer(cmd_buffer, &begin_info);
+    
+    // Record copy command
+    VkBufferCopy copy_region = {};
+    copy_region.size = size;
+    vkCmdCopyBuffer(cmd_buffer, src_buffer, dst_buffer, 1, &copy_region);
+    
+    // End recording
+    vkEndCommandBuffer(cmd_buffer);
+    
+    // Submit to graphics queue
+    VkSubmitInfo submit_info = {};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = (const void* const*)&cmd_buffer;
+    
+    if (vkQueueSubmit(graphics_queue_, 1, &submit_info, nullptr) != VK_SUCCESS) {
+        SetError("Failed to submit copy buffer command");
+        vkFreeCommandBuffers(device_, command_pool_, 1, (const void* const*)&cmd_buffer);
+        return;
+    }
+    
+    // Wait for completion
+    vkQueueWaitIdle(graphics_queue_);
+    
+    // Free temporary command buffer
+    vkFreeCommandBuffers(device_, command_pool_, 1, (const void* const*)&cmd_buffer);
 }
 
 void VulkanRenderer::DestroyBuffer(VkBuffer& buffer, VkDeviceMemory& memory) {
-    // Phase 5f Stub: Destroy buffer and free GPU memory
-    // TODO Phase 5g: Implement vkDestroyBuffer() and vkFreeMemory()
-    (void)&buffer; (void)&memory;
+    // Phase 5g - Cleanup GPU buffer and memory (safety-checked)
+    
+    if (buffer != nullptr) {
+        vkDestroyBuffer(device_, buffer, nullptr);
+        buffer = nullptr;
+    }
+    
+    if (memory != nullptr) {
+        vkFreeMemory(device_, memory, nullptr);
+        memory = nullptr;
+    }
 }
 
 void VulkanRenderer::UpdateInstanceData(uint32_t sprite_index, const SpritePacket& sprite,

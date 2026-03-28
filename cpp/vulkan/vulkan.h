@@ -127,4 +127,14 @@ VkResult vkMapMemory(VkDevice device, void* memory, uint64_t offset, uint64_t si
 void vkUnmapMemory(VkDevice device, void* memory);
 VkResult vkCmdCopyImageToBuffer(void* commandBuffer, void* srcImage, uint32_t srcImageLayout, void* dstBuffer, uint32_t regionCount, const void* pRegions);
 
+// Phase 5g: GPU memory and buffer operations
+void vkGetPhysicalDeviceMemoryProperties(VkPhysicalDevice physicalDevice, void* pMemoryProperties);
+void vkGetBufferMemoryRequirements(VkDevice device, void* buffer, void* pMemoryRequirements);
+VkResult vkCmdCopyBuffer(void* commandBuffer, void* srcBuffer, void* dstBuffer, uint32_t regionCount, const void* pRegions);
+VkResult vkCmdBindVertexBuffers(void* commandBuffer, uint32_t firstBinding, uint32_t bindingCount, const void* const* pBuffers, const uint64_t* pOffsets);
+VkResult vkCmdBindIndexBuffer(void* commandBuffer, void* buffer, uint64_t offset, uint32_t indexType);
+VkResult vkCmdDrawIndexed(void* commandBuffer, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
+VkResult vkCmdAllocateCommandBuffers(VkDevice device, const void* pAllocateInfo, void* pCommandBuffers);
+VkResult vkFreeCommandBuffers(VkDevice device, VkCommandPool commandPool, uint32_t commandBufferCount, const void* const* pCommandBuffers);
+
 #endif // VULKAN_H_
