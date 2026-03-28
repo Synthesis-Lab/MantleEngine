@@ -45,6 +45,8 @@ typedef struct VkFramebuffer_T* VkFramebuffer;
 typedef struct VkSemaphore_T* VkSemaphore;
 typedef struct VkFence_T* VkFence;
 typedef struct VkPipeline_T* VkPipeline;
+typedef struct VkBuffer_T* VkBuffer;
+typedef struct VkDeviceMemory_T* VkDeviceMemory;
 
 // Basic types
 typedef uint32_t VkFlags;
@@ -115,7 +117,14 @@ void vkDestroyFence(VkDevice device, void* fence, const void* pAllocator);
 VkResult vkWaitForFences(VkDevice device, uint32_t fenceCount, const void* const* pFences, uint32_t waitAll, uint64_t timeout);
 VkResult vkResetFences(VkDevice device, uint32_t fenceCount, const void* const* pFences);
 
-// Phase 5c handle types
-typedef struct VkFence_T* VkFence;
+// Phase 5d: Output Integration - Buffer and memory operations
+VkResult vkCreateBuffer(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pBuffer);
+void vkDestroyBuffer(VkDevice device, void* buffer, const void* pAllocator);
+VkResult vkAllocateMemory(VkDevice device, const void* pAllocateInfo, const void* pAllocator, void* pMemory);
+void vkFreeMemory(VkDevice device, void* memory, const void* pAllocator);
+VkResult vkBindBufferMemory(VkDevice device, void* buffer, void* memory, uint64_t memoryOffset);
+VkResult vkMapMemory(VkDevice device, void* memory, uint64_t offset, uint64_t size, uint32_t flags, void** ppData);
+void vkUnmapMemory(VkDevice device, void* memory);
+VkResult vkCmdCopyImageToBuffer(void* commandBuffer, void* srcImage, uint32_t srcImageLayout, void* dstBuffer, uint32_t regionCount, const void* pRegions);
 
 #endif // VULKAN_H_

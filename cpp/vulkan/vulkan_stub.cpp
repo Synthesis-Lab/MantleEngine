@@ -330,3 +330,56 @@ VkResult vkResetFences(VkDevice device, uint32_t fenceCount, const void* const* 
     // No-op in stub: fence reset simulated
     return VK_SUCCESS;
 }
+
+// Phase 5d: Output Integration - Buffer and memory stubs
+VkResult vkCreateBuffer(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pBuffer) {
+    // Stub: allocate dummy buffer handle
+    if (pBuffer) {
+        *(void**)pBuffer = new uint8_t[8]; // Allocate 8 bytes for handle
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyBuffer(VkDevice device, void* buffer, const void* pAllocator) {
+    // Stub: free dummy buffer handle
+    if (buffer) {
+        delete[] reinterpret_cast<uint8_t*>(buffer);
+    }
+}
+
+VkResult vkAllocateMemory(VkDevice device, const void* pAllocateInfo, const void* pAllocator, void* pMemory) {
+    // Stub: allocate dummy memory handle
+    if (pMemory) {
+        *(void**)pMemory = new uint8_t[16]; // Allocate 16 bytes for handle
+    }
+    return VK_SUCCESS;
+}
+
+void vkFreeMemory(VkDevice device, void* memory, const void* pAllocator) {
+    // Stub: free dummy memory handle
+    if (memory) {
+        delete[] reinterpret_cast<uint8_t*>(memory);
+    }
+}
+
+VkResult vkBindBufferMemory(VkDevice device, void* buffer, void* memory, uint64_t memoryOffset) {
+    // Stub: buffer-memory binding simulated
+    return VK_SUCCESS;
+}
+
+VkResult vkMapMemory(VkDevice device, void* memory, uint64_t offset, uint64_t size, uint32_t flags, void** ppData) {
+    // Stub: return dummy pointer for mapped memory
+    if (ppData) {
+        *ppData = reinterpret_cast<void*>(0x1000); // Dummy address
+    }
+    return VK_SUCCESS;
+}
+
+void vkUnmapMemory(VkDevice device, void* memory) {
+    // Stub: memory unmapping simulated
+}
+
+VkResult vkCmdCopyImageToBuffer(void* commandBuffer, void* srcImage, uint32_t srcImageLayout, void* dstBuffer, uint32_t regionCount, const void* pRegions) {
+    // Stub: GPU→CPU copy simulated
+    return VK_SUCCESS;
+}

@@ -590,4 +590,62 @@ typedef struct {
     const void* const* pSignalSemaphores;
 } VkSubmitInfo;
 
+// Phase 5d: Output Integration - Buffer and memory structures
+// Memory property flags for buffer allocation
+enum VkMemoryPropertyFlagBits {
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT = 0x00000001,
+    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT = 0x00000002,
+    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT = 0x00000004,
+    VK_MEMORY_PROPERTY_HOST_CACHED_BIT = 0x00000008,
+};
+typedef uint32_t VkMemoryPropertyFlags;
+
+// Buffer usage flags
+enum VkBufferUsageFlagBits {
+    VK_BUFFER_USAGE_TRANSFER_DST_BIT = 0x00000001,
+    VK_BUFFER_USAGE_TRANSFER_SRC_BIT = 0x00000002,
+    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT = 0x00000004,
+    VK_BUFFER_USAGE_STORAGE_BUFFER_BIT = 0x00000008,
+    VK_BUFFER_USAGE_INDEX_BUFFER_BIT = 0x00000010,
+    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT = 0x00000020,
+};
+typedef uint32_t VkBufferUsageFlags;
+
+// Memory allocate info (for GPU memory allocation)
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint64_t allocationSize;
+    uint32_t memoryTypeIndex;
+} VkMemoryAllocateInfo;
+
+// Buffer create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t createFlags;
+    uint64_t size;
+    VkBufferUsageFlags usage;
+    uint32_t sharingMode;
+    uint32_t queueFamilyIndexCount;
+    const uint32_t* pQueueFamilyIndices;
+} VkBufferCreateInfo;
+
+// Image copy region for buffer→image transfers
+typedef struct {
+    uint64_t bufferOffset;
+    uint32_t bufferRowLength;
+    uint32_t bufferImageHeight;
+    struct {
+        uint32_t x;
+        uint32_t y;
+        uint32_t z;
+    } imageOffset;
+    struct {
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+    } imageExtent;
+} VkBufferImageCopy;
+
 #endif // VULKAN_STRUCT_H_

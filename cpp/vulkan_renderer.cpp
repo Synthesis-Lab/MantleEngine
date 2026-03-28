@@ -2,6 +2,7 @@
 #include "shaders/shader.h"
 #include <cstdarg>
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 #include <vector>
 
@@ -147,6 +148,11 @@ bool VulkanRenderer::Initialize() {
         return false;
     }
     
+    // Phase 5d: Initialize frame output and dumping
+    enable_frame_dump_ = true;  // Enable frame dumping by default
+    frame_dump_count_ = 1;      // Start counting from frame 1
+    pixel_buffer_.clear();      // Will be allocated on first dump
+    
     is_initialized_ = true;
     is_ready_ = true;
     frame_number_ = 0;
@@ -183,6 +189,9 @@ void VulkanRenderer::Shutdown() {
     
     // Command buffers are freed automatically with command pool, just clear the vector
     command_buffers_.clear();
+    
+    // Phase 5d: Clean up pixel buffer
+    pixel_buffer_.clear();
     
     // Phase 5a: Destroy framebuffers
     for (auto framebuffer : framebuffers_) {
@@ -729,6 +738,9 @@ void VulkanRenderer::RecordCommandBuffer(uint32_t image_index, const RenderPacke
         return;
     }
     
+    // Phase 5d: Dump frame for visualization
+    DumpCurrentFrame(image_index);
+    
     // Frame successfully recorded and submitted
     frame_number_++;
     
@@ -1169,5 +1181,100 @@ bool VulkanRenderer::CreateGraphicsPipeline() {
     DestroyShaderModule(frag_shader);
     
     std::cout << "[MantleRenderer] Graphics pipeline created (Phase 5b)" << std::endl;
+    return true;
+}
+
+// Phase 5d: Output Integration - Frame dumping and PPM export
+void VulkanRenderer::DumpCurrentFrame(uint32_t image_index) {
+    if (!enable_frame_dump_) {
+        return;
+    }
+    
+    // In headless stub mode, generate a simple test pattern
+    uint32_t width = swapchain_extent_.width;
+    uint32_t height = swapchain_extent_.height;
+    
+    // Initialize pixel buffer if not already done
+    if (pixel_buffer_.empty()) {
+        pixel_buffer_.resize(width * height, 0xFF000000); // Black background (RGBA)
+    }
+    
+    // Create a simple test pattern: mostly black with green triangle
+    // Clear to black
+    for (uint32_t i = 0; i < width * height; ++i) {
+        pixel_buffer_[i] = 0xFF000000; // RGBA: Black (A=255)
+    }
+    
+    // Draw a simple green triangle in the center (fullscreen triangle)
+    // Triangle vertices: (-1,-1), (1,-1), (0,1) in normalized coordinates
+    // Convert to screen coordinates:
+    // Top-left: (0, height/2)
+    // Top-right: (width, height/2)
+    // Bottom-center: (width/2, height)
+    
+    uint32_t tri_color = 0xFF00FF00; // Green (RGB: 0, 255, 0, A: 255)
+    
+    // Draw bottom triangle
+    for (uint32_t y = height / 2; y < height; ++y) {
+        uint32_t y_offset = y * width;
+        
+        // Calculate x range for this scanline
+        // Left edge: from (0, height/2) to (width/2, height)
+        // At y, x_left = (y - height/2) * 0.5
+        double y_normalized = (double)(y - height/2) / (double)(height / 2);
+        uint32_t x_min = (uint32_t)(width/2 * y_normalized);
+        uint32_t x_max = width - x_min;
+        
+        // Draw pixels in this scanline
+        for (uint32_t x = x_min; x < x_max && x < width; ++x) {
+            pixel_buffer_[y_offset + x] = tri_color;
+        }
+    }
+    
+    // Generate filename
+    char filename[256];
+    snprintf(filename, sizeof(filename), "output/frame_%04u.ppm", frame_dump_count_);
+    
+    // Save to PPM
+    if (SaveFrameToPPM(filename, width, height)) {
+        std::cout << "[MantleRenderer] Frame dumped: " << filename << std::endl;
+        frame_dump_count_++;
+    } else {
+        std::cout << "[MantleRenderer] Failed to dump frame: " << filename << std::endl;
+    }
+}
+
+bool VulkanRenderer::SaveFrameToPPM(const char* filename, uint32_t width, uint32_t height) {
+    // Ensure output directory exists
+    system("mkdir -p output");
+    
+    // Open file for binary writing
+    FILE* file = fopen(filename, "wb");
+    if (!file) {
+        SetError("Failed to open file for writing: %s", filename);
+        return false;
+    }
+    
+    // Write PPM header (P6 = binary RGB format)
+    // Format: P6\nwidth height\n255\npixel_data
+    fprintf(file, "P6\n%u %u\n255\n", width, height);
+    
+    // Write pixel data (RGB triplets)
+    // Convert from RGBA to RGB by skipping the alpha channel
+    for (uint32_t i = 0; i < width * height; ++i) {
+        uint32_t rgba = pixel_buffer_[i];
+        
+        // Extract RGBA components (assuming little-endian: 0xAABBGGRR)
+        uint8_t r = (rgba >> 0) & 0xFF;
+        uint8_t g = (rgba >> 8) & 0xFF;
+        uint8_t b = (rgba >> 16) & 0xFF;
+        
+        // Write RGB triplet
+        fputc(r, file);
+        fputc(g, file);
+        fputc(b, file);
+    }
+    
+    fclose(file);
     return true;
 }

@@ -107,6 +107,11 @@ private:
     std::vector<VkCommandBuffer> command_buffers_;
     VkFence render_fence_;
     
+    // Phase 5d: Frame output and visualization
+    std::vector<uint32_t> pixel_buffer_;
+    bool enable_frame_dump_;
+    uint32_t frame_dump_count_;
+    
     // Queue family indices
     uint32_t graphics_family_;
     uint32_t present_family_;
@@ -150,6 +155,10 @@ private:
     void RenderTransforms(VkCommandBuffer cmd_buffer, const RenderPacket* packet);
     void RenderSprites(VkCommandBuffer cmd_buffer, const RenderPacket* packet);
     void RenderColliders(VkCommandBuffer cmd_buffer, const RenderPacket* packet);
+    
+    // Phase 5d: Output and frame dumping
+    void DumpCurrentFrame(uint32_t image_index);
+    bool SaveFrameToPPM(const char* filename, uint32_t width, uint32_t height);
     
     // Error reporting
     void SetError(const char* format, ...);
