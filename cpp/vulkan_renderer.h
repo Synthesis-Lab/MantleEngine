@@ -23,6 +23,10 @@ struct VkFramebuffer_T;
 struct VkSemaphore_T;
 struct VkFence_T;
 struct VkPipeline_T;
+struct VkDescriptorSetLayout_T;
+struct VkDescriptorPool_T;
+struct VkDescriptorSet_T;
+struct VkSampler_T;
 
 typedef VkInstance_T* VkInstance;
 typedef VkPhysicalDevice_T* VkPhysicalDevice;
@@ -37,6 +41,10 @@ typedef VkFramebuffer_T* VkFramebuffer;
 typedef VkSemaphore_T* VkSemaphore;
 typedef VkFence_T* VkFence;
 typedef VkPipeline_T* VkPipeline;
+typedef VkDescriptorSetLayout_T* VkDescriptorSetLayout;
+typedef VkDescriptorPool_T* VkDescriptorPool;
+typedef VkDescriptorSet_T* VkDescriptorSet;
+typedef VkSampler_T* VkSampler;
 
 /// VulkanRenderer - Core 2D rendering engine
 /// Manages Vulkan initialization, command buffers, and rendering pipeline
@@ -112,6 +120,25 @@ private:
     bool enable_frame_dump_;
     uint32_t frame_dump_count_;
     
+    // Phase 5f: GPU Buffers for sprite rendering
+    VkBuffer quad_vertex_buffer_;       // Static quad vertices (4 vertices)
+    VkDeviceMemory quad_vertex_memory_;
+    VkBuffer quad_index_buffer_;        // Static quad indices (6 indices: 2 triangles)
+    VkDeviceMemory quad_index_memory_;
+    VkBuffer instance_buffer_;          // Dynamic instance data (copied per frame)
+    VkDeviceMemory instance_buffer_memory_;
+    
+    // Phase 5f: Descriptor sets for texture binding
+    VkDescriptorSetLayout descriptor_set_layout_;
+    VkDescriptorPool descriptor_pool_;
+    std::vector<VkDescriptorSet> descriptor_sets_;  // One per texture ID
+    
+    // Phase 5f: Placeholder texture for white/fallback
+    VkImage placeholder_texture_;
+    VkImageView placeholder_texture_view_;
+    VkDeviceMemory placeholder_texture_memory_;
+    VkSampler texture_sampler_;
+    
     // Queue family indices
     uint32_t graphics_family_;
     uint32_t present_family_;
@@ -142,6 +169,24 @@ private:
     bool CreateGraphicsPipeline();
     VkShaderModule CreateShaderModule(const void* code, uint32_t size);
     void DestroyShaderModule(VkShaderModule module);
+    
+    // Phase 5f: GPU Buffer Creation & Management
+    bool CreateQuadGeometry();           // Create vertex/index buffers for quad
+    bool CreateInstanceBuffer();         // Create dynamic instance data buffer
+    bool CreateDescriptorSets();         // Create descriptor set layout and pool
+    bool CreatePlaceholderTexture();     // Create white texture fallback
+    bool CreateTextureSampler();         // Create VkSampler for texture filtering
+    
+    // Phase 5f: Buffer Helper Methods
+    bool CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, 
+                     VkMemoryPropertyFlags properties,
+                     VkBuffer& buffer, VkDeviceMemory& memory);
+    void CopyBuffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size);
+    void DestroyBuffer(VkBuffer& buffer, VkDeviceMemory& memory);
+    
+    // Phase 5f: Instance Data Management
+    void UpdateInstanceData(uint32_t sprite_index, const SpritePacket& sprite, 
+                           const TransformPacket& transform, uint8_t* data_ptr);
     
     // Phase 5c: Command buffer recording & frame submission
     bool AllocateCommandBuffers();

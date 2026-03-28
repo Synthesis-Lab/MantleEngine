@@ -89,7 +89,7 @@ impl RenderData {
     /// Estimate memory usage in bytes
     pub fn estimated_size_bytes(&self) -> usize {
         (self.transform_packets.len() * 28) // TransformPacket is 28 bytes
-            + (self.sprite_packets.len() * 36) // SpritePacket is 36 bytes
+            + (self.sprite_packets.len() * 32) // SpritePacket is 32 bytes
             + (self.collider_packets.len() * 24) // ColliderPacket is 24 bytes
     }
 }

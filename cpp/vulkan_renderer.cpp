@@ -598,10 +598,10 @@ void VulkanRenderer::DestroyFence() {
 }
 
 bool VulkanRenderer::RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t image_index) {
-    // Phase 5c - Render Command Recording
-    // Purpose: Record draw commands into command buffer
+    // Phase 5f - Real Geometry Rendering
+    // Purpose: Record draw commands for all sprites in render packet
     //
-    // This function records the actual rendering commands that will be executed on the GPU
+    // This function iterates over sprite packets and records rendering commands
     
     if (image_index >= framebuffers_.size()) {
         SetError("Invalid framebuffer index: %u", image_index);
@@ -631,7 +631,16 @@ bool VulkanRenderer::RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t i
     // Bind graphics pipeline
     vkCmdBindPipeline(cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
     
-    // Draw fullscreen triangle (3 vertices, 1 instance, 0 indices)
+    // Phase 5f: Temporary - render fullscreen triangle as placeholder
+    // TODO: In Phase 5g, replace with proper quad geometry rendering:
+    // - Bind vertex buffer (quad_vertex_buffer_)
+    // - Bind index buffer (quad_index_buffer_)
+    // - For each sprite in render packet:
+    //   - Update instance buffer with transform/sprite data
+    //   - Bind descriptor set for texture
+    //   - vkCmdDrawIndexed(cmd_buffer, 6, 1, 0, 0, i) for each sprite
+    //
+    // Current Phase 5f: Draw fullscreen triangle (3 vertices, 1 instance, 0 indices)
     // Positions are hardcoded in vertex shader
     vkCmdDraw(cmd_buffer, 3, 1, 0, 0);
     
@@ -1277,4 +1286,82 @@ bool VulkanRenderer::SaveFrameToPPM(const char* filename, uint32_t width, uint32
     
     fclose(file);
     return true;
+}
+
+// ============================================================================
+// Phase 5f: GPU Buffer Management (Stubs for Phase 5g Implementation)
+// ============================================================================
+
+bool VulkanRenderer::CreateQuadGeometry() {
+    // Phase 5f Stub: Create vertex and index buffers for quad geometry
+    // TODO Phase 5g: Implement with CreateBuffer() helper
+    // - Create VkBuffer for 4 quad vertices with positions and texcoords
+    // - Create VkBuffer for 6 indices (2 triangles)
+    std::cout << "[MantleRenderer] Phase 5f: CreateQuadGeometry() - stub (Phase 5g implementation pending)" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreateInstanceBuffer() {
+    // Phase 5f Stub: Create dynamic instance data buffer
+    // TODO Phase 5g: Implement with CreateBuffer() helper
+    // - Allocate buffer large enough for MAX_SPRITES instance data
+    // - Used for transform, sprite data, colors, UV bounds per frame
+    std::cout << "[MantleRenderer] Phase 5f: CreateInstanceBuffer() - stub (Phase 5g implementation pending)" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreateDescriptorSets() {
+    // Phase 5f Stub: Create descriptor set layout and pool for textures
+    // TODO Phase 5g: Implement with CreateDescriptorSetLayout()
+    // - Define descriptor set layout for sampler2D bindings
+    // - Create descriptor pool with capacity for texture count
+    // - Allocate descriptor sets (one per texture ID)
+    std::cout << "[MantleRenderer] Phase 5f: CreateDescriptorSets() - stub (Phase 5g implementation pending)" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreatePlaceholderTexture() {
+    // Phase 5f Stub: Create white placeholder texture
+    // TODO Phase 5g: Implement with VkImage creation and memory allocation
+    // - Create 1x1 white texture for fallback/testing
+    // - Allocate GPU memory and copy pixel data
+    std::cout << "[MantleRenderer] Phase 5f: CreatePlaceholderTexture() - stub (Phase 5g implementation pending)" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreateTextureSampler() {
+    // Phase 5f Stub: Create VkSampler for texture filtering
+    // TODO Phase 5g: Implement with vkCreateSampler()
+    // - Configure magFilter, minFilter (LINEAR or NEAREST)
+    // - Configure addressMode (CLAMP_TO_EDGE or REPEAT)
+    std::cout << "[MantleRenderer] Phase 5f: CreateTextureSampler() - stub (Phase 5g implementation pending)" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
+                                  VkMemoryPropertyFlags properties,
+                                  VkBuffer& buffer, VkDeviceMemory& memory) {
+    // Phase 5f Stub: Helper to create and allocate a VkBuffer
+    // TODO Phase 5g: Implement vkCreateBuffer() and vkAllocateMemory()
+    (void)size; (void)usage; (void)properties; (void)&buffer; (void)&memory;
+    return true;
+}
+
+void VulkanRenderer::CopyBuffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
+    // Phase 5f Stub: Copy data between buffers using command buffer
+    // TODO Phase 5g: Implement vkCmdCopyBuffer()
+    (void)src_buffer; (void)dst_buffer; (void)size;
+}
+
+void VulkanRenderer::DestroyBuffer(VkBuffer& buffer, VkDeviceMemory& memory) {
+    // Phase 5f Stub: Destroy buffer and free GPU memory
+    // TODO Phase 5g: Implement vkDestroyBuffer() and vkFreeMemory()
+    (void)&buffer; (void)&memory;
+}
+
+void VulkanRenderer::UpdateInstanceData(uint32_t sprite_index, const SpritePacket& sprite,
+                                        const TransformPacket& transform, uint8_t* data_ptr) {
+    // Phase 5f Stub: Copy sprite and transform data to instance buffer
+    // TODO Phase 5g: Implement memcpy or direct struct copies
+    (void)sprite_index; (void)sprite; (void)transform; (void)data_ptr;
 }

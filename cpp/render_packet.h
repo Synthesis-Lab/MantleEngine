@@ -25,49 +25,46 @@ struct TransformPacket {
 static_assert(sizeof(TransformPacket) == 28, "TransformPacket must be 28 bytes");
 
 /// SpritePacket - Byte-perfect mirror of Rust repr(C) struct
-/// Size: 36 bytes
+/// Size: 32 bytes (matches Rust exactly)
 struct SpritePacket {
     uint32_t texture_id;       // +0  bytes
     float width;               // +4  bytes
     float height;              // +8  bytes
-    float color_r;             // +12 bytes
-    float color_g;             // +16 bytes
-    float color_b;             // +20 bytes
-    float color_a;             // +24 bytes
-    float uv_min_x;            // +28 bytes
-    float uv_min_y;            // +32 bytes
+    uint32_t color;            // +12 bytes (packed RGBA: 0xRRGGBBAA)
+    float uv_min_x;            // +16 bytes
+    float uv_min_y;            // +20 bytes
+    float uv_max_x;            // +24 bytes
+    float uv_max_y;            // +28 bytes
     
     SpritePacket() = default;
     
-    SpritePacket(uint32_t tex_id, float w, float h, 
-                 float r, float g, float b, float a,
-                 float uv_x, float uv_y)
-        : texture_id(tex_id), width(w), height(h),
-          color_r(r), color_g(g), color_b(b), color_a(a),
-          uv_min_x(uv_x), uv_min_y(uv_y) {}
+    SpritePacket(uint32_t tex_id, float w, float h, uint32_t col,
+                 float uv_min_x_val, float uv_min_y_val,
+                 float uv_max_x_val, float uv_max_y_val)
+        : texture_id(tex_id), width(w), height(h), color(col),
+          uv_min_x(uv_min_x_val), uv_min_y(uv_min_y_val),
+          uv_max_x(uv_max_x_val), uv_max_y(uv_max_y_val) {}
 };
 
-static_assert(sizeof(SpritePacket) == 36, "SpritePacket must be 36 bytes");
+static_assert(sizeof(SpritePacket) == 32, "SpritePacket must be 32 bytes");
 
 /// ColliderPacket - Byte-perfect mirror of Rust repr(C) struct
-/// Size: 28 bytes
+/// Size: 24 bytes (matches Rust exactly)
 struct ColliderPacket {
     uint32_t shape_type;       // +0  bytes (0 = AABB, 1 = Circle)
-    float width;               // +4  bytes (AABB: width, Circle: unused)
-    float height;              // +8  bytes (AABB: height, Circle: unused)
-    float radius;              // +12 bytes (Circle: radius, AABB: unused)
-    float offset_x;            // +16 bytes
-    float offset_y;            // +20 bytes
-    uint32_t padding;          // +24 bytes (alignment)
+    float x;                   // +4  bytes (position)
+    float y;                   // +8  bytes (position)
+    float width;               // +12 bytes (AABB: width, Circle: unused)
+    float height;              // +16 bytes (AABB: height, Circle: unused)
+    float radius;              // +20 bytes (Circle: radius, AABB: unused)
     
     ColliderPacket() = default;
     
-    ColliderPacket(uint32_t shape, float w, float h, float r, float ox, float oy)
-        : shape_type(shape), width(w), height(h), radius(r), 
-          offset_x(ox), offset_y(oy), padding(0) {}
+    ColliderPacket(uint32_t shape, float x_pos, float y_pos, float w, float h, float r)
+        : shape_type(shape), x(x_pos), y(y_pos), width(w), height(h), radius(r) {}
 };
 
-static_assert(sizeof(ColliderPacket) == 28, "ColliderPacket must be 28 bytes");
+static_assert(sizeof(ColliderPacket) == 24, "ColliderPacket must be 24 bytes");
 
 /// RenderPacket - Frame data and array pointers for batch rendering
 /// Contains frame metadata and pointers to transform/sprite/collider arrays
