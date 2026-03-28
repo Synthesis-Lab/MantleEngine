@@ -5,7 +5,7 @@
 #include <cstring>
 
 // Instance functions
-VkResult vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo, 
+VkResult vkCreateInstance(const void* pCreateInfo, 
                          const void* pAllocator, 
                          VkInstance* pInstance) {
     if (pInstance) {
@@ -40,19 +40,20 @@ VkResult vkEnumeratePhysicalDevices(VkInstance instance,
 
 // Physical device properties
 void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice, 
-                                   VkPhysicalDeviceProperties* pProperties) {
+                                   void* pProperties) {
     if (pProperties) {
-        memset(pProperties, 0, sizeof(VkPhysicalDeviceProperties));
-        pProperties->apiVersion = VK_API_VERSION_1_2;
-        strncpy(pProperties->deviceName, "Stub Vulkan Device", 255);
-        pProperties->deviceName[255] = '\0';
+        auto* props = reinterpret_cast<VkPhysicalDeviceProperties*>(pProperties);
+        memset(props, 0, sizeof(VkPhysicalDeviceProperties));
+        props->apiVersion = VK_API_VERSION_1_2;
+        strncpy(props->deviceName, "Stub Vulkan Device", 255);
+        props->deviceName[255] = '\0';
     }
 }
 
 // Queue family properties
 void vkGetPhysicalDeviceQueueFamilyProperties(VkPhysicalDevice physicalDevice, 
                                               uint32_t* pQueueFamilyPropertyCount, 
-                                              VkQueueFamilyProperties* pQueueFamilyProperties) {
+                                              void* pQueueFamilyProperties) {
     if (!pQueueFamilyPropertyCount) return;
     
     if (!pQueueFamilyProperties) {
@@ -61,15 +62,16 @@ void vkGetPhysicalDeviceQueueFamilyProperties(VkPhysicalDevice physicalDevice,
     }
     
     if (*pQueueFamilyPropertyCount > 0) {
-        pQueueFamilyProperties[0].queueFlags = VK_QUEUE_GRAPHICS_BIT;
-        pQueueFamilyProperties[0].queueCount = 1;
+        auto* props = reinterpret_cast<VkQueueFamilyProperties*>(pQueueFamilyProperties);
+        props[0].queueFlags = VK_QUEUE_GRAPHICS_BIT;
+        props[0].queueCount = 1;
     }
     *pQueueFamilyPropertyCount = 1;
 }
 
 // Device creation
 VkResult vkCreateDevice(VkPhysicalDevice physicalDevice, 
-                       const VkDeviceCreateInfo* pCreateInfo, 
+                       const void* pCreateInfo, 
                        const void* pAllocator, 
                        VkDevice* pDevice) {
     if (pDevice) {
@@ -98,7 +100,7 @@ VkResult vkDeviceWaitIdle(VkDevice device) {
 
 // Command pool
 VkResult vkCreateCommandPool(VkDevice device, 
-                            const VkCommandPoolCreateInfo* pCreateInfo, 
+                            const void* pCreateInfo, 
                             const void* pAllocator, 
                             VkCommandPool* pCommandPool) {
     if (pCommandPool) {
@@ -156,4 +158,65 @@ VkResult vkDestroyFramebuffer(VkDevice device, VkFramebuffer framebuffer,
         delete[] reinterpret_cast<char*>(framebuffer);
     }
     return VK_SUCCESS;
+}
+
+// Phase 5b: Render Pass
+VkResult vkCreateRenderPass(VkDevice device, const void* pCreateInfo,
+                           const void* pAllocator, VkRenderPass* pRenderPass) {
+    if (pRenderPass) {
+        *pRenderPass = reinterpret_cast<VkRenderPass>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+// Phase 5b: Shader Module
+VkResult vkCreateShaderModule(VkDevice device, const void* pCreateInfo,
+                             const void* pAllocator, void* pShaderModule) {
+    if (pShaderModule) {
+        void** module_ptr = reinterpret_cast<void**>(pShaderModule);
+        *module_ptr = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyShaderModule(VkDevice device, void* shaderModule, const void* pAllocator) {
+    if (shaderModule) {
+        delete[] reinterpret_cast<char*>(shaderModule);
+    }
+}
+
+// Phase 5b: Pipeline Layout
+VkResult vkCreatePipelineLayout(VkDevice device, const void* pCreateInfo,
+                               const void* pAllocator, void* pPipelineLayout) {
+    if (pPipelineLayout) {
+        void** layout_ptr = reinterpret_cast<void**>(pPipelineLayout);
+        *layout_ptr = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyPipelineLayout(VkDevice device, void* pipelineLayout, const void* pAllocator) {
+    if (pipelineLayout) {
+        delete[] reinterpret_cast<char*>(pipelineLayout);
+    }
+}
+
+// Phase 5b: Graphics Pipeline
+VkResult vkCreateGraphicsPipelines(VkDevice device, void* pipelineCache, 
+                                  uint32_t createInfoCount, 
+                                  const void* pCreateInfos,
+                                  const void* pAllocator, void* pPipelines) {
+    if (pPipelines) {
+        void** pipelines_ptr = reinterpret_cast<void**>(pPipelines);
+        for (uint32_t i = 0; i < createInfoCount; ++i) {
+            pipelines_ptr[i] = reinterpret_cast<void*>(new char[256]);
+        }
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyPipeline(VkDevice device, void* pipeline, const void* pAllocator) {
+    if (pipeline) {
+        delete[] reinterpret_cast<char*>(pipeline);
+    }
 }

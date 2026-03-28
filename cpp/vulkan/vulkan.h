@@ -50,7 +50,7 @@ typedef struct VkPipeline_T* VkPipeline;
 typedef uint32_t VkFlags;
 typedef uint32_t VkBool32;
 typedef uint32_t VkDeviceSize;
-typedef uint32_t VkFormat;
+// VkFormat is defined as enum in vulkan_struct.h
 
 // Extent for images
 typedef struct {
@@ -75,5 +75,18 @@ VkResult vkDestroySwapchainKHR(VkDevice device, VkSwapchainKHR swapchain, const 
 VkResult vkDestroyImageView(VkDevice device, VkImageView imageView, const void* pAllocator);
 VkResult vkDestroyRenderPass(VkDevice device, VkRenderPass renderPass, const void* pAllocator);
 VkResult vkDestroyFramebuffer(VkDevice device, VkFramebuffer framebuffer, const void* pAllocator);
+
+// Phase 5b functions (render pass and pipeline)
+VkResult vkCreateRenderPass(VkDevice device, const void* pCreateInfo, const void* pAllocator, VkRenderPass* pRenderPass);
+VkResult vkCreateShaderModule(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pShaderModule);
+void vkDestroyShaderModule(VkDevice device, void* shaderModule, const void* pAllocator);
+VkResult vkCreatePipelineLayout(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pPipelineLayout);
+void vkDestroyPipelineLayout(VkDevice device, void* pipelineLayout, const void* pAllocator);
+VkResult vkCreateGraphicsPipelines(VkDevice device, void* pipelineCache, uint32_t createInfoCount, const void* pCreateInfos, const void* pAllocator, void* pPipelines);
+void vkDestroyPipeline(VkDevice device, void* pipeline, const void* pAllocator);
+
+// Phase 5b handle types
+typedef struct VkShaderModule_T* VkShaderModule;
+typedef struct VkPipelineLayout_T* VkPipelineLayout;
 
 #endif // VULKAN_H_

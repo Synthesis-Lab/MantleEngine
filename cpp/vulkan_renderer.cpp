@@ -1,4 +1,5 @@
 #include "vulkan_renderer.h"
+#include "shaders/shader.h"
 #include <cstdarg>
 #include <cstring>
 #include <iostream>
@@ -122,6 +123,18 @@ bool VulkanRenderer::Initialize() {
         return false;
     }
     
+    // Phase 5b: Create pipeline layout for graphics pipeline
+    if (!CreatePipelineLayout()) {
+        SetError("Failed to create pipeline layout");
+        return false;
+    }
+    
+    // Phase 5b: Create graphics pipeline (with render pass)
+    if (!CreateGraphicsPipeline()) {
+        SetError("Failed to create graphics pipeline");
+        return false;
+    }
+    
     is_initialized_ = true;
     is_ready_ = true;
     frame_number_ = 0;
@@ -139,6 +152,18 @@ void VulkanRenderer::Shutdown() {
     // Wait for device idle before destruction
     if (device_ != nullptr) {
         vkDeviceWaitIdle(device_);
+    }
+    
+    // Phase 5b: Destroy graphics pipeline
+    if (graphics_pipeline_ != nullptr) {
+        vkDestroyPipeline(device_, graphics_pipeline_, nullptr);
+        graphics_pipeline_ = nullptr;
+    }
+    
+    // Phase 5b: Destroy pipeline layout
+    if (pipeline_layout_ != nullptr) {
+        vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
+        pipeline_layout_ = nullptr;
     }
     
     // Phase 5a: Destroy framebuffers
@@ -645,7 +670,7 @@ bool VulkanRenderer::CreateSwapchain() {
     swapchain_extent_.height = 768;
     
     // Define swapchain format (RGBA 8-bit)
-    swapchain_image_format_ = 37; // VK_FORMAT_B8G8R8A8_UNORM
+    swapchain_image_format_ = (VkFormat)VK_FORMAT_B8G8R8A8_UNORM;
     
     // For headless mode: swapchain_ remains nullptr
     // Images are created separately for offscreen rendering
@@ -680,22 +705,54 @@ bool VulkanRenderer::CreateImageViews() {
 }
 
 bool VulkanRenderer::CreateRenderPass() {
-    // Phase 5a - Render Pass Creation
+    // Phase 5b - Render Pass Creation (Proper Implementation)
     // Purpose: Create a VkRenderPass defining rendering operations
     // Specifies attachments (color, depth), load/store operations, and subpass dependencies
     
-    // Real implementation would:
-    // 1. Create VkAttachmentDescription (color output)
-    // 2. Create VkAttachmentReference (reference in render pass)
-    // 3. Create VkSubpassDescription (render operation)
-    // 4. Call vkCreateRenderPass
+    // Color attachment description
+    VkAttachmentDescription color_attachment = {};
+    color_attachment.format = VK_FORMAT_B8G8R8A8_UNORM;
+    color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     
-    // For Phase 5a, create minimal render pass
-    // Just log creation (actual Vulkan object creation deferred to Phase 5b)
+    // Color attachment reference
+    VkAttachmentReference color_attachment_ref = {};
+    color_attachment_ref.attachment = 0;
+    color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     
-    render_pass_ = nullptr; // Placeholder
+    // Subpass description
+    VkSubpassDescription subpass = {};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment_ref;
     
-    std::cout << "[MantleRenderer] Render pass created" << std::endl;
+    // Subpass dependency
+    VkSubpassDependency dependency = {};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    
+    // Render pass create info
+    VkRenderPassCreateInfo render_pass_info = {};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_info.attachmentCount = 1;
+    render_pass_info.pAttachments = &color_attachment;
+    render_pass_info.subpassCount = 1;
+    render_pass_info.pSubpasses = &subpass;
+    render_pass_info.dependencyCount = 1;
+    render_pass_info.pDependencies = &dependency;
+    
+    if (vkCreateRenderPass(device_, &render_pass_info, nullptr, &render_pass_) != VK_SUCCESS) {
+        SetError("Failed to create render pass");
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Render pass created (Phase 5b)" << std::endl;
     return true;
 }
 
@@ -722,4 +779,185 @@ void VulkanRenderer::SetError(const char* format, ...) {
     va_end(args);
     
     std::cerr << "[MantleRenderer ERROR] " << last_error_ << std::endl;
+}
+
+// ============================================================================
+// Phase 5b: Render Passes & Pipelines Implementation
+// ============================================================================
+
+VkShaderModule VulkanRenderer::CreateShaderModule(const void* code, uint32_t size) {
+    // Phase 5b - Shader Module Creation
+    // Purpose: Create VkShaderModule from SPIR-V bytecode
+    
+    VkShaderModuleCreateInfo create_info = {};
+    create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    create_info.codeSize = size;
+    create_info.pCode = reinterpret_cast<const uint32_t*>(code);
+    
+    VkShaderModule shader_module = nullptr;
+    if (vkCreateShaderModule(device_, &create_info, nullptr, &shader_module) != VK_SUCCESS) {
+        SetError("Failed to create shader module");
+        return nullptr;
+    }
+    
+    return shader_module;
+}
+
+void VulkanRenderer::DestroyShaderModule(VkShaderModule module) {
+    // Phase 5b - Shader Module Destruction
+    if (module != nullptr) {
+        vkDestroyShaderModule(device_, module, nullptr);
+    }
+}
+
+bool VulkanRenderer::CreatePipelineLayout() {
+    // Phase 5b - Pipeline Layout Creation
+    // Purpose: Define the layout for graphics pipeline (push constants, descriptors, etc.)
+    // For Phase 5b, use empty layout (no descriptors or push constants yet)
+    
+    VkPipelineLayoutCreateInfo pipeline_layout_info = {};
+    pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipeline_layout_info.setLayoutCount = 0;
+    pipeline_layout_info.pSetLayouts = nullptr;
+    pipeline_layout_info.pushConstantRangeCount = 0;
+    pipeline_layout_info.pPushConstantRanges = nullptr;
+    
+    if (vkCreatePipelineLayout(device_, &pipeline_layout_info, nullptr, &pipeline_layout_) != VK_SUCCESS) {
+        SetError("Failed to create pipeline layout");
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Pipeline layout created" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreateGraphicsPipeline() {
+    // Phase 5b - Graphics Pipeline Creation
+    // Purpose: Create the graphics pipeline with shaders, rasterization state, and render pass
+    
+    // Create shader modules from embedded SPIR-V
+    VkShaderModule vert_shader = CreateShaderModule(g_VertexShaderSPIRV, sizeof(g_VertexShaderSPIRV));
+    if (vert_shader == nullptr) {
+        SetError("Failed to create vertex shader module");
+        return false;
+    }
+    
+    VkShaderModule frag_shader = CreateShaderModule(g_FragmentShaderSPIRV, sizeof(g_FragmentShaderSPIRV));
+    if (frag_shader == nullptr) {
+        SetError("Failed to create fragment shader module");
+        DestroyShaderModule(vert_shader);
+        return false;
+    }
+    
+    // Shader stage create infos
+    VkPipelineShaderStageCreateInfo vert_stage = {};
+    vert_stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vert_stage.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vert_stage.module = vert_shader;
+    vert_stage.pName = "main";
+    
+    VkPipelineShaderStageCreateInfo frag_stage = {};
+    frag_stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    frag_stage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    frag_stage.module = frag_shader;
+    frag_stage.pName = "main";
+    
+    VkPipelineShaderStageCreateInfo shader_stages[] = {vert_stage, frag_stage};
+    
+    // Vertex input state (empty for Phase 5b - hardcoded fullscreen triangle)
+    VkPipelineVertexInputStateCreateInfo vertex_input_info = {};
+    vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertex_input_info.vertexBindingDescriptionCount = 0;
+    vertex_input_info.pVertexBindingDescriptions = nullptr;
+    vertex_input_info.vertexAttributeDescriptionCount = 0;
+    vertex_input_info.pVertexAttributeDescriptions = nullptr;
+    
+    // Input assembly state
+    VkPipelineInputAssemblyStateCreateInfo input_assembly_info = {};
+    input_assembly_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    input_assembly_info.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    input_assembly_info.primitiveRestartEnable = false;
+    
+    // Viewport and scissor
+    VkViewport viewport = {};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)swapchain_extent_.width;
+    viewport.height = (float)swapchain_extent_.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    
+    VkRect2D scissor = {};
+    scissor.offset = {0, 0};
+    scissor.extent.width = swapchain_extent_.width;
+    scissor.extent.height = swapchain_extent_.height;
+    
+    VkPipelineViewportStateCreateInfo viewport_state = {};
+    viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewport_state.viewportCount = 1;
+    viewport_state.pViewports = &viewport;
+    viewport_state.scissorCount = 1;
+    viewport_state.pScissors = &scissor;
+    
+    // Rasterization state
+    VkPipelineRasterizationStateCreateInfo rasterizer = {};
+    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rasterizer.depthClampEnable = false;
+    rasterizer.rasterizerDiscardEnable = false;
+    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+    rasterizer.lineWidth = 1.0f;
+    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.depthBiasEnable = false;
+    
+    // MSAA state
+    VkPipelineMultisampleStateCreateInfo multisampling = {};
+    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisampling.sampleShadingEnable = false;
+    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    
+    // Color blend state
+    VkPipelineColorBlendAttachmentState color_blend_attachment = {};
+    color_blend_attachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | 
+                                            VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    color_blend_attachment.blendEnable = false;
+    
+    VkPipelineColorBlendStateCreateInfo color_blending = {};
+    color_blending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    color_blending.logicOpEnable = false;
+    color_blending.attachmentCount = 1;
+    color_blending.pAttachments = &color_blend_attachment;
+    
+    // Graphics pipeline create info
+    VkGraphicsPipelineCreateInfo pipeline_info = {};
+    pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipeline_info.stageCount = 2;
+    pipeline_info.pStages = shader_stages;
+    pipeline_info.pVertexInputState = &vertex_input_info;
+    pipeline_info.pInputAssemblyState = &input_assembly_info;
+    pipeline_info.pViewportState = &viewport_state;
+    pipeline_info.pRasterizationState = &rasterizer;
+    pipeline_info.pMultisampleState = &multisampling;
+    pipeline_info.pDepthStencilState = nullptr;
+    pipeline_info.pColorBlendState = &color_blending;
+    pipeline_info.pDynamicState = nullptr;
+    pipeline_info.layout = pipeline_layout_;
+    pipeline_info.renderPass = render_pass_;
+    pipeline_info.subpass = 0;
+    pipeline_info.basePipelineHandle = nullptr;
+    pipeline_info.basePipelineIndex = -1;
+    
+    if (vkCreateGraphicsPipelines(device_, nullptr, 1, &pipeline_info, nullptr, &graphics_pipeline_) != VK_SUCCESS) {
+        SetError("Failed to create graphics pipeline");
+        DestroyShaderModule(vert_shader);
+        DestroyShaderModule(frag_shader);
+        return false;
+    }
+    
+    // Cleanup shader modules (can be deleted after pipeline creation)
+    DestroyShaderModule(vert_shader);
+    DestroyShaderModule(frag_shader);
+    
+    std::cout << "[MantleRenderer] Graphics pipeline created (Phase 5b)" << std::endl;
+    return true;
 }

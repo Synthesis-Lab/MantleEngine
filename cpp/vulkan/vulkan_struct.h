@@ -9,8 +9,47 @@
 enum VkStructureType {
     VK_STRUCTURE_TYPE_APPLICATION_INFO = 0,
     VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO = 1,
-    VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO = 3,
     VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO = 2,
+    VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO = 3,
+    VK_STRUCTURE_TYPE_SUBMIT_INFO = 4,
+    VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO = 5,
+    VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE = 6,
+    VK_STRUCTURE_TYPE_BIND_SPARSE_INFO = 7,
+    VK_STRUCTURE_TYPE_FENCE_CREATE_INFO = 8,
+    VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO = 9,
+    VK_STRUCTURE_TYPE_EVENT_CREATE_INFO = 10,
+    VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO = 11,
+    VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO = 12,
+    VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO = 13,
+    VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO = 14,
+    VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO = 15,
+    VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO = 16,
+    VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO = 17,
+    VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO = 18,
+    VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO = 19,
+    VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO = 20,
+    VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO = 21,
+    VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO = 22,
+    VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO = 23,
+    VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO = 24,
+    VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO = 25,
+    VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO = 26,
+    VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO = 27,
+    VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO = 28,
+    VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO = 29,
+    VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO = 30,
+    VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO = 31,
+    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO = 32,
+    VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO = 33,
+    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO = 34,
+    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET = 35,
+    VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET = 36,
+    VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO = 37,
+    VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO = 38,
+    VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION = 39,
+    VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE = 40,
+    VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION = 41,
+    VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY = 42,
     VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO = 16,
 };
 
@@ -27,6 +66,17 @@ enum VkCommandPoolCreateFlagBits {
     VK_COMMAND_POOL_CREATE_TRANSIENT_BIT = 0x00000001,
     VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT = 0x00000002,
 };
+
+// Format enum (Phase 5b)
+enum VkFormat {
+    VK_FORMAT_UNDEFINED = 0,
+    VK_FORMAT_R8_UNORM = 9,
+    VK_FORMAT_R8G8B8A8_UNORM = 37,
+    VK_FORMAT_B8G8R8A8_UNORM = 44,
+};
+
+// Subpass dependency constants (Phase 5b)
+#define VK_SUBPASS_EXTERNAL (~0U)
 
 // Application info structure
 typedef struct {
@@ -164,5 +214,296 @@ typedef struct {
     uint32_t variableMultisampleRate;
     uint32_t inheritedQueries;
 } VkPhysicalDeviceFeatures;
+
+// Phase 5b: Render Pass and Pipeline structures
+enum VkImageLayout {
+    VK_IMAGE_LAYOUT_UNDEFINED = 0,
+    VK_IMAGE_LAYOUT_GENERAL = 1,
+    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL = 2,
+    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL = 3,
+    VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL = 4,
+    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL = 5,
+    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL = 6,
+    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL = 7,
+    VK_IMAGE_LAYOUT_PREINITIALIZED = 8,
+    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR = 1000001002,
+};
+
+enum VkAttachmentLoadOp {
+    VK_ATTACHMENT_LOAD_OP_LOAD = 0,
+    VK_ATTACHMENT_LOAD_OP_CLEAR = 1,
+    VK_ATTACHMENT_LOAD_OP_DONT_CARE = 2,
+};
+
+enum VkAttachmentStoreOp {
+    VK_ATTACHMENT_STORE_OP_STORE = 0,
+    VK_ATTACHMENT_STORE_OP_DONT_CARE = 1,
+};
+
+enum VkSampleCountFlagBits {
+    VK_SAMPLE_COUNT_1_BIT = 0x00000001,
+    VK_SAMPLE_COUNT_2_BIT = 0x00000002,
+    VK_SAMPLE_COUNT_4_BIT = 0x00000004,
+};
+
+enum VkPipelineBindPoint {
+    VK_PIPELINE_BIND_POINT_GRAPHICS = 0,
+    VK_PIPELINE_BIND_POINT_COMPUTE = 1,
+};
+
+enum VkShaderStageFlagBits {
+    VK_SHADER_STAGE_VERTEX_BIT = 0x00000001,
+    VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT = 0x00000002,
+    VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT = 0x00000004,
+    VK_SHADER_STAGE_GEOMETRY_BIT = 0x00000008,
+    VK_SHADER_STAGE_FRAGMENT_BIT = 0x00000010,
+};
+
+enum VkPrimitiveTopology {
+    VK_PRIMITIVE_TOPOLOGY_POINT_LIST = 0,
+    VK_PRIMITIVE_TOPOLOGY_LINE_LIST = 1,
+    VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST = 3,
+};
+
+enum VkPolygonMode {
+    VK_POLYGON_MODE_FILL = 0,
+    VK_POLYGON_MODE_LINE = 1,
+    VK_POLYGON_MODE_POINT = 2,
+};
+
+enum VkCullModeFlagBits {
+    VK_CULL_MODE_NONE = 0,
+    VK_CULL_MODE_FRONT_BIT = 0x00000001,
+    VK_CULL_MODE_BACK_BIT = 0x00000002,
+};
+
+enum VkFrontFace {
+    VK_FRONT_FACE_COUNTER_CLOCKWISE = 0,
+    VK_FRONT_FACE_CLOCKWISE = 1,
+};
+
+enum VkPipelineStageFlagBits {
+    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT = 0x00000001,
+    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT = 0x00000080,
+};
+
+enum VkAccessFlagBits {
+    VK_ACCESS_COLOR_ATTACHMENT_READ_BIT = 0x00000080,
+    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT = 0x00000100,
+};
+
+enum VkColorComponentFlagBits {
+    VK_COLOR_COMPONENT_R_BIT = 0x00000001,
+    VK_COLOR_COMPONENT_G_BIT = 0x00000002,
+    VK_COLOR_COMPONENT_B_BIT = 0x00000004,
+    VK_COLOR_COMPONENT_A_BIT = 0x00000008,
+};
+
+// Attachment description
+typedef struct {
+    uint32_t flags;
+    uint32_t format;
+    uint32_t samples;
+    uint32_t loadOp;
+    uint32_t storeOp;
+    uint32_t stencilLoadOp;
+    uint32_t stencilStoreOp;
+    uint32_t initialLayout;
+    uint32_t finalLayout;
+} VkAttachmentDescription;
+
+// Attachment reference
+typedef struct {
+    uint32_t attachment;
+    uint32_t layout;
+} VkAttachmentReference;
+
+// Subpass description
+typedef struct {
+    uint32_t flags;
+    uint32_t pipelineBindPoint;
+    uint32_t inputAttachmentCount;
+    const VkAttachmentReference* pInputAttachments;
+    uint32_t colorAttachmentCount;
+    const VkAttachmentReference* pColorAttachments;
+    const VkAttachmentReference* pResolveAttachments;
+    const VkAttachmentReference* pDepthStencilAttachment;
+    uint32_t preserveAttachmentCount;
+    const uint32_t* pPreserveAttachments;
+} VkSubpassDescription;
+
+// Subpass dependency
+typedef struct {
+    uint32_t srcSubpass;
+    uint32_t dstSubpass;
+    uint32_t srcStageMask;
+    uint32_t dstStageMask;
+    uint32_t srcAccessMask;
+    uint32_t dstAccessMask;
+    uint32_t dependencyFlags;
+} VkSubpassDependency;
+
+// Render pass create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t attachmentCount;
+    const VkAttachmentDescription* pAttachments;
+    uint32_t subpassCount;
+    const VkSubpassDescription* pSubpasses;
+    uint32_t dependencyCount;
+    const VkSubpassDependency* pDependencies;
+} VkRenderPassCreateInfo;
+
+// Shader module create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t codeSize;
+    const uint32_t* pCode;
+} VkShaderModuleCreateInfo;
+
+// Pipeline shader stage create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t stage;
+    void* module; // VkShaderModule
+    const char* pName;
+    const void* pSpecializationInfo;
+} VkPipelineShaderStageCreateInfo;
+
+// Pipeline vertex input state
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t vertexBindingDescriptionCount;
+    const void* pVertexBindingDescriptions;
+    uint32_t vertexAttributeDescriptionCount;
+    const void* pVertexAttributeDescriptions;
+} VkPipelineVertexInputStateCreateInfo;
+
+// Pipeline input assembly state
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t topology;
+    uint32_t primitiveRestartEnable;
+} VkPipelineInputAssemblyStateCreateInfo;
+
+// Viewport
+typedef struct {
+    float x, y, width, height, minDepth, maxDepth;
+} VkViewport;
+
+// Rect2D
+typedef struct {
+    struct { int32_t x, y; } offset;
+    struct { uint32_t width, height; } extent;
+} VkRect2D;
+
+// Pipeline viewport state
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t viewportCount;
+    const VkViewport* pViewports;
+    uint32_t scissorCount;
+    const VkRect2D* pScissors;
+} VkPipelineViewportStateCreateInfo;
+
+// Pipeline rasterization state
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t depthClampEnable;
+    uint32_t rasterizerDiscardEnable;
+    uint32_t polygonMode;
+    uint32_t cullMode;
+    uint32_t frontFace;
+    uint32_t depthBiasEnable;
+    float depthBiasConstantFactor;
+    float depthBiasClamp;
+    float depthBiasSlopeFactor;
+    float lineWidth;
+} VkPipelineRasterizationStateCreateInfo;
+
+// Pipeline multisample state
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t rasterizationSamples;
+    uint32_t sampleShadingEnable;
+    float minSampleShading;
+    const uint32_t* pSampleMask;
+    uint32_t alphaToCoverageEnable;
+    uint32_t alphaToOneEnable;
+} VkPipelineMultisampleStateCreateInfo;
+
+// Pipeline color blend attachment state
+typedef struct {
+    uint32_t blendEnable;
+    uint32_t srcColorBlendFactor;
+    uint32_t dstColorBlendFactor;
+    uint32_t colorBlendOp;
+    uint32_t srcAlphaBlendFactor;
+    uint32_t dstAlphaBlendFactor;
+    uint32_t alphaBlendOp;
+    uint32_t colorWriteMask;
+} VkPipelineColorBlendAttachmentState;
+
+// Pipeline color blend state
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t logicOpEnable;
+    uint32_t logicOp;
+    uint32_t attachmentCount;
+    const VkPipelineColorBlendAttachmentState* pAttachments;
+    float blendConstants[4];
+} VkPipelineColorBlendStateCreateInfo;
+
+// Pipeline layout create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t setLayoutCount;
+    const void* const* pSetLayouts;
+    uint32_t pushConstantRangeCount;
+    const void* pPushConstantRanges;
+} VkPipelineLayoutCreateInfo;
+
+// Pipeline create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t stageCount;
+    const VkPipelineShaderStageCreateInfo* pStages;
+    const VkPipelineVertexInputStateCreateInfo* pVertexInputState;
+    const VkPipelineInputAssemblyStateCreateInfo* pInputAssemblyState;
+    const void* pTessellationState;
+    const VkPipelineViewportStateCreateInfo* pViewportState;
+    const VkPipelineRasterizationStateCreateInfo* pRasterizationState;
+    const VkPipelineMultisampleStateCreateInfo* pMultisampleState;
+    const void* pDepthStencilState;
+    const VkPipelineColorBlendStateCreateInfo* pColorBlendState;
+    const void* pDynamicState;
+    void* layout; // VkPipelineLayout
+    void* renderPass; // VkRenderPass
+    uint32_t subpass;
+    void* basePipelineHandle; // VkPipeline
+    int32_t basePipelineIndex;
+} VkGraphicsPipelineCreateInfo;
 
 #endif // VULKAN_STRUCT_H_
