@@ -99,6 +99,10 @@ private:
     VkRenderPass render_pass_;
     std::vector<VkFramebuffer> framebuffers_;
     
+    // Phase 5b: Graphics pipeline
+    VkPipelineLayout pipeline_layout_;
+    VkPipeline graphics_pipeline_;
+    
     // Queue family indices
     uint32_t graphics_family_;
     uint32_t present_family_;
@@ -123,6 +127,12 @@ private:
     bool CreateImageViews();
     bool CreateRenderPass();
     bool CreateFramebuffers();
+    
+    // Phase 5b: Render Pass & Pipelines (enhanced)
+    bool CreatePipelineLayout();
+    bool CreateGraphicsPipeline();
+    VkShaderModule CreateShaderModule(const void* code, uint32_t size);
+    void DestroyShaderModule(VkShaderModule module);
     
     // Helper methods for rendering
     void RecordCommandBuffer(uint32_t image_index, const RenderPacket* packet);
