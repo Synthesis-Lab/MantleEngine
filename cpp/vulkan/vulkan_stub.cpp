@@ -368,9 +368,23 @@ VkResult vkBindBufferMemory(VkDevice device, void* buffer, void* memory, uint64_
 }
 
 VkResult vkMapMemory(VkDevice device, void* memory, uint64_t offset, uint64_t size, uint32_t flags, void** ppData) {
-    // Stub: return dummy pointer for mapped memory
+    // Stub: return a properly allocated pointer for mapped memory
+    // Use a large static buffer to simulate host-visible memory
+    static char* mapped_memory = nullptr;
+    static size_t mapped_size = 0;
+    
+    if (!mapped_memory || mapped_size < (offset + size)) {
+        // Allocate or reallocate if needed
+        if (mapped_memory) {
+            delete[] mapped_memory;
+        }
+        uint64_t required_size = offset + size;
+        mapped_size = (required_size > 10 * 1024 * 1024) ? required_size : (10 * 1024 * 1024); // At least 10MB
+        mapped_memory = new char[mapped_size];
+    }
+    
     if (ppData) {
-        *ppData = reinterpret_cast<void*>(0x1000); // Dummy address
+        *ppData = mapped_memory + offset;  // Return proper valid pointer
     }
     return VK_SUCCESS;
 }
@@ -407,5 +421,144 @@ void vkGetBufferMemoryRequirements(VkDevice device, void* buffer, void* pMemoryR
 
 VkResult vkCmdCopyBuffer(void* commandBuffer, void* srcBuffer, void* dstBuffer, uint32_t regionCount, const void* pRegions) {
     // Stub: buffer copy command recorded
+    return VK_SUCCESS;
+}
+
+// Phase 5g: Descriptor sets, textures, and samplers
+VkResult vkCreateDescriptorSetLayout(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pSetLayout) {
+    // Stub: return dummy descriptor set layout
+    if (pSetLayout) {
+        *(void**)pSetLayout = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyDescriptorSetLayout(VkDevice device, void* descriptorSetLayout, const void* pAllocator) {
+    // Stub: cleanup descriptor set layout
+    if (descriptorSetLayout) {
+        delete[] reinterpret_cast<char*>(descriptorSetLayout);
+    }
+}
+
+VkResult vkCreateDescriptorPool(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pDescriptorPool) {
+    // Stub: return dummy descriptor pool
+    if (pDescriptorPool) {
+        *(void**)pDescriptorPool = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyDescriptorPool(VkDevice device, void* descriptorPool, const void* pAllocator) {
+    // Stub: cleanup descriptor pool
+    if (descriptorPool) {
+        delete[] reinterpret_cast<char*>(descriptorPool);
+    }
+}
+
+VkResult vkAllocateDescriptorSets(VkDevice device, const void* pAllocateInfo, void* pDescriptorSets) {
+    // Stub: allocate descriptor sets
+    if (pDescriptorSets) {
+        *(void**)pDescriptorSets = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+VkResult vkFreeDescriptorSets(VkDevice device, void* descriptorPool, uint32_t descriptorSetCount, const void* const* pDescriptorSets) {
+    // Stub: free descriptor sets
+    if (pDescriptorSets) {
+        for (uint32_t i = 0; i < descriptorSetCount; i++) {
+            if (pDescriptorSets[i]) {
+                delete[] reinterpret_cast<char*>(const_cast<void*>(pDescriptorSets[i]));
+            }
+        }
+    }
+    return VK_SUCCESS;
+}
+
+VkResult vkCreateSampler(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pSampler) {
+    // Stub: return dummy sampler
+    if (pSampler) {
+        *(void**)pSampler = reinterpret_cast<void*>(new char[256]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroySampler(VkDevice device, void* sampler, const void* pAllocator) {
+    // Stub: cleanup sampler
+    if (sampler) {
+        delete[] reinterpret_cast<char*>(sampler);
+    }
+}
+
+VkResult vkCreateImage(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pImage) {
+    // Stub: return dummy image
+    if (pImage) {
+        *(void**)pImage = reinterpret_cast<void*>(new char[512]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyImage(VkDevice device, void* image, const void* pAllocator) {
+    // Stub: cleanup image
+    if (image) {
+        delete[] reinterpret_cast<char*>(image);
+    }
+}
+
+VkResult vkCreateImageView(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pView) {
+    // Stub: return dummy image view
+    if (pView) {
+        *(void**)pView = reinterpret_cast<void*>(new char[128]);
+    }
+    return VK_SUCCESS;
+}
+
+void vkDestroyImageView(VkDevice device, void* imageView, const void* pAllocator) {
+    // Stub: cleanup image view
+    if (imageView) {
+        delete[] reinterpret_cast<char*>(imageView);
+    }
+}
+
+void vkGetImageMemoryRequirements(VkDevice device, void* image, void* pMemoryRequirements) {
+    // Stub: return dummy image memory requirements
+    if (pMemoryRequirements) {
+        auto* memReqs = reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements);
+        memset(memReqs, 0, sizeof(VkMemoryRequirements));
+        memReqs->size = 4096;  // Dummy size for 1x1 image
+        memReqs->alignment = 4096;
+        memReqs->memoryTypeBits = 1;
+    }
+}
+
+VkResult vkBindImageMemory(VkDevice device, void* image, void* memory, uint64_t memoryOffset) {
+    // Stub: bind image memory
+    return VK_SUCCESS;
+}
+
+// Phase 5g: Descriptor set binding
+VkResult vkCmdBindDescriptorSets(void* commandBuffer, uint32_t pipelineBindPoint, void* layout,
+                                 uint32_t firstSet, uint32_t descriptorSetCount,
+                                 const void* const* pDescriptorSets, uint32_t dynamicOffsetCount,
+                                 const uint32_t* pDynamicOffsets) {
+    // Stub: bind descriptor sets for texture binding
+    return VK_SUCCESS;
+}
+
+// Phase 5h: Vertex and index buffer binding, indexed drawing
+VkResult vkCmdBindVertexBuffers(void* commandBuffer, uint32_t firstBinding, uint32_t bindingCount,
+                                const void* const* pBuffers, const uint64_t* pOffsets) {
+    // Stub: bind vertex buffers to command buffer
+    return VK_SUCCESS;
+}
+
+VkResult vkCmdBindIndexBuffer(void* commandBuffer, void* buffer, uint64_t offset, uint32_t indexType) {
+    // Stub: bind index buffer to command buffer
+    return VK_SUCCESS;
+}
+
+VkResult vkCmdDrawIndexed(void* commandBuffer, uint32_t indexCount, uint32_t instanceCount,
+                          uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) {
+    // Stub: record indexed draw command
     return VK_SUCCESS;
 }

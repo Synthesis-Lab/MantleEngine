@@ -136,6 +136,37 @@ bool VulkanRenderer::Initialize() {
         return false;
     }
     
+    // Phase 5g: Create GPU buffers for sprite rendering
+    if (!CreateQuadGeometry()) {
+        SetError("Failed to create quad geometry buffers");
+        return false;
+    }
+    
+    if (!CreateInstanceBuffer()) {
+        SetError("Failed to create instance buffer");
+        return false;
+    }
+    
+    if (!CreateStagingInstanceBuffer()) {
+        SetError("Failed to create staging instance buffer");
+        return false;
+    }
+    
+    if (!CreateDescriptorSets()) {
+        SetError("Failed to create descriptor sets");
+        return false;
+    }
+    
+    if (!CreateTextureSampler()) {
+        SetError("Failed to create texture sampler");
+        return false;
+    }
+    
+    if (!CreatePlaceholderTexture()) {
+        SetError("Failed to create placeholder texture");
+        return false;
+    }
+    
     // Phase 5c: Allocate command buffers for rendering
     if (!AllocateCommandBuffers()) {
         SetError("Failed to allocate command buffers");
@@ -171,6 +202,46 @@ void VulkanRenderer::Shutdown() {
     if (device_ != nullptr) {
         vkDeviceWaitIdle(device_);
     }
+    
+    // Phase 5g: Destroy descriptor sets and texture sampler
+    descriptor_sets_.clear();
+    
+    if (texture_sampler_ != nullptr) {
+        vkDestroySampler(device_, texture_sampler_, nullptr);
+        texture_sampler_ = nullptr;
+    }
+    
+    if (descriptor_pool_ != nullptr) {
+        vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
+        descriptor_pool_ = nullptr;
+    }
+    
+    if (descriptor_set_layout_ != nullptr) {
+        vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
+        descriptor_set_layout_ = nullptr;
+    }
+    
+    // Phase 5g: Destroy placeholder texture
+    if (placeholder_texture_view_ != nullptr) {
+        vkDestroyImageView(device_, placeholder_texture_view_, nullptr);
+        placeholder_texture_view_ = nullptr;
+    }
+    
+    if (placeholder_texture_ != nullptr) {
+        vkDestroyImage(device_, placeholder_texture_, nullptr);
+        placeholder_texture_ = nullptr;
+    }
+    
+    if (placeholder_texture_memory_ != nullptr) {
+        vkFreeMemory(device_, placeholder_texture_memory_, nullptr);
+        placeholder_texture_memory_ = nullptr;
+    }
+    
+    // Phase 5g: Destroy GPU buffers
+    DestroyBuffer(staging_instance_buffer_, staging_instance_memory_);  // Phase 5h: Staging buffer
+    DestroyBuffer(instance_buffer_, instance_buffer_memory_);
+    DestroyBuffer(quad_index_buffer_, quad_index_memory_);
+    DestroyBuffer(quad_vertex_buffer_, quad_vertex_memory_);
     
     // Phase 5b: Destroy graphics pipeline
     if (graphics_pipeline_ != nullptr) {
@@ -597,11 +668,9 @@ void VulkanRenderer::DestroyFence() {
     }
 }
 
-bool VulkanRenderer::RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t image_index) {
-    // Phase 5f - Real Geometry Rendering
+bool VulkanRenderer::RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t image_index, const RenderPacket* packet) {
+    // Phase 5g - Real Geometry Rendering with Sprites
     // Purpose: Record draw commands for all sprites in render packet
-    //
-    // This function iterates over sprite packets and records rendering commands
     
     if (image_index >= framebuffers_.size()) {
         SetError("Invalid framebuffer index: %u", image_index);
@@ -631,18 +700,69 @@ bool VulkanRenderer::RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t i
     // Bind graphics pipeline
     vkCmdBindPipeline(cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
     
-    // Phase 5f: Temporary - render fullscreen triangle as placeholder
-    // TODO: In Phase 5g, replace with proper quad geometry rendering:
-    // - Bind vertex buffer (quad_vertex_buffer_)
-    // - Bind index buffer (quad_index_buffer_)
-    // - For each sprite in render packet:
-    //   - Update instance buffer with transform/sprite data
-    //   - Bind descriptor set for texture
-    //   - vkCmdDrawIndexed(cmd_buffer, 6, 1, 0, 0, i) for each sprite
-    //
-    // Current Phase 5f: Draw fullscreen triangle (3 vertices, 1 instance, 0 indices)
-    // Positions are hardcoded in vertex shader
-    vkCmdDraw(cmd_buffer, 3, 1, 0, 0);
+    // Phase 5g: Sprite rendering with quad geometry
+    // Bind static quad vertex and index buffers
+    uint64_t vertex_offset = 0;
+    vkCmdBindVertexBuffers(cmd_buffer, 0, 1, (const void* const*)&quad_vertex_buffer_, &vertex_offset);
+    vkCmdBindIndexBuffer(cmd_buffer, quad_index_buffer_, 0, VK_INDEX_TYPE_UINT32);
+    
+    // Phase 5h: Full sprite rendering loop with instancing
+    if (packet != nullptr && packet->sprite_count > 0) {
+        // Map staging buffer for CPU access
+        void* mapped_data = nullptr;
+        const uint32_t MAX_SPRITES = 4096;
+        uint32_t instance_data_size = MAX_SPRITES * (sizeof(TransformPacket) + sizeof(SpritePacket));
+        
+        VkResult map_result = vkMapMemory(device_, staging_instance_memory_, 0, instance_data_size, 0, &mapped_data);
+        if (map_result == VK_SUCCESS && mapped_data != nullptr) {
+            uint8_t* instance_data_ptr = reinterpret_cast<uint8_t*>(mapped_data);
+            
+            // Update instance data for all sprites in the packet
+            uint32_t sprite_count = packet->sprite_count > MAX_SPRITES ? MAX_SPRITES : packet->sprite_count;
+            for (uint32_t i = 0; i < sprite_count; i++) {
+                UpdateInstanceData(i, packet->sprites[i], packet->transforms[i], instance_data_ptr);
+            }
+            
+            // Unmap staging buffer
+            vkUnmapMemory(device_, staging_instance_memory_);
+            
+            // Copy staging buffer to device-local instance buffer
+            uint32_t copy_size = sprite_count * (sizeof(TransformPacket) + sizeof(SpritePacket));
+            CopyBuffer(staging_instance_buffer_, instance_buffer_, copy_size);
+            
+            // Bind instance buffer as vertex buffer for per-instance data
+            uint64_t instance_offset = 0;
+            vkCmdBindVertexBuffers(cmd_buffer, 1, 1, (const void* const*)&instance_buffer_, &instance_offset);
+            
+            // Draw each sprite with its texture descriptor set
+            for (uint32_t i = 0; i < sprite_count; i++) {
+                // Bind descriptor set for texture
+                uint32_t tex_id = packet->sprites[i].texture_id;
+                const void* descriptor_set_to_bind = nullptr;
+                
+                if (tex_id < descriptor_sets_.size() && descriptor_sets_[tex_id] != nullptr) {
+                    descriptor_set_to_bind = reinterpret_cast<const void*>(descriptor_sets_[tex_id]);
+                } else {
+                    // Use placeholder texture if texture ID is invalid
+                    descriptor_set_to_bind = reinterpret_cast<const void*>(descriptor_sets_[0]);
+                }
+                
+                vkCmdBindDescriptorSets(cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       pipeline_layout_, 0, 1, 
+                                       reinterpret_cast<const void* const*>(&descriptor_set_to_bind), 
+                                       0, nullptr);
+                
+                // Draw indexed: 6 indices (quad), 1 instance per sprite
+                vkCmdDrawIndexed(cmd_buffer, 6, 1, 0, 0, i);
+            }
+        } else {
+            // Fallback: Draw placeholder quad if mapping fails
+            vkCmdDrawIndexed(cmd_buffer, 6, 1, 0, 0, 0);
+        }
+    } else {
+        // No packet or no sprites: Draw placeholder quad as proof-of-concept
+        vkCmdDrawIndexed(cmd_buffer, 6, 1, 0, 0, 0);
+    }
     
     // End render pass
     vkCmdEndRenderPass(cmd_buffer);
@@ -728,7 +848,7 @@ void VulkanRenderer::RecordCommandBuffer(uint32_t image_index, const RenderPacke
     }
     
     // Step 2: Record rendering commands
-    if (!RecordRenderCommands(cmd_buffer, image_index)) {
+    if (!RecordRenderCommands(cmd_buffer, image_index, packet)) {
         SetError("Failed to record render commands");
         vkEndCommandBuffer(cmd_buffer);
         return;
@@ -1042,23 +1162,33 @@ void VulkanRenderer::DestroyShaderModule(VkShaderModule module) {
 }
 
 bool VulkanRenderer::CreatePipelineLayout() {
-    // Phase 5b - Pipeline Layout Creation
-    // Purpose: Define the layout for graphics pipeline (push constants, descriptors, etc.)
-    // For Phase 5b, use empty layout (no descriptors or push constants yet)
+    // Phase 5g - Pipeline Layout Creation with Descriptor Sets
+    // Purpose: Define the layout for graphics pipeline with descriptor sets for textures
+    
+    // For Phase 5b (basic): empty layout, for Phase 5g: include descriptor set layout
+    // Note: descriptor_set_layout_ is set during CreateDescriptorSets() if successful
     
     VkPipelineLayoutCreateInfo pipeline_layout_info = {};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipeline_layout_info.setLayoutCount = 0;
-    pipeline_layout_info.pSetLayouts = nullptr;
     pipeline_layout_info.pushConstantRangeCount = 0;
     pipeline_layout_info.pPushConstantRanges = nullptr;
+    
+    // Only set descriptor layout if available
+    if (descriptor_set_layout_ != nullptr) {
+        pipeline_layout_info.setLayoutCount = 1;
+        const void* layout_ptr = reinterpret_cast<const void*>(descriptor_set_layout_);
+        pipeline_layout_info.pSetLayouts = reinterpret_cast<const void* const*>(&layout_ptr);
+    } else {
+        pipeline_layout_info.setLayoutCount = 0;
+        pipeline_layout_info.pSetLayouts = nullptr;
+    }
     
     if (vkCreatePipelineLayout(device_, &pipeline_layout_info, nullptr, &pipeline_layout_) != VK_SUCCESS) {
         SetError("Failed to create pipeline layout");
         return false;
     }
     
-    std::cout << "[MantleRenderer] Pipeline layout created" << std::endl;
+    std::cout << "[MantleRenderer] Pipeline layout created (descriptor sets: " << pipeline_layout_info.setLayoutCount << ")" << std::endl;
     return true;
 }
 
@@ -1323,48 +1453,355 @@ uint32_t VulkanRenderer::FindMemoryType(uint32_t type_filter, VkMemoryPropertyFl
 // ============================================================================
 
 bool VulkanRenderer::CreateQuadGeometry() {
-    // Phase 5f Stub: Create vertex and index buffers for quad geometry
-    // TODO Phase 5g: Implement with CreateBuffer() helper
-    // - Create VkBuffer for 4 quad vertices with positions and texcoords
-    // - Create VkBuffer for 6 indices (2 triangles)
-    std::cout << "[MantleRenderer] Phase 5f: CreateQuadGeometry() - stub (Phase 5g implementation pending)" << std::endl;
+    // Phase 5g - Create vertex and index buffers for quad geometry
+    
+    // Define quad vertices (normalized square: -0.5 to +0.5)
+    // Each vertex: position (2x float) + UV coords (2x float) = 16 bytes
+    struct Vertex {
+        float pos_x, pos_y;    // Position
+        float uv_x, uv_y;      // Texture coordinates
+    };
+    
+    Vertex vertices[] = {
+        // Bottom-left
+        {-0.5f, -0.5f,  0.0f, 0.0f},
+        // Top-left
+        {-0.5f,  0.5f,  0.0f, 1.0f},
+        // Top-right
+        { 0.5f,  0.5f,  1.0f, 1.0f},
+        // Bottom-right
+        { 0.5f, -0.5f,  1.0f, 0.0f},
+    };
+    
+    uint32_t indices[] = {
+        // First triangle
+        0, 1, 2,
+        // Second triangle
+        0, 2, 3,
+    };
+    
+    // Create vertex buffer
+    if (!CreateBuffer(
+        sizeof(vertices),
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        quad_vertex_buffer_,
+        quad_vertex_memory_
+    )) {
+        SetError("Failed to create quad vertex buffer");
+        return false;
+    }
+    
+    // Copy vertex data to GPU
+    void* vertex_data;
+    if (vkMapMemory(device_, quad_vertex_memory_, 0, sizeof(vertices), 0, &vertex_data) == VK_SUCCESS) {
+        memcpy(vertex_data, vertices, sizeof(vertices));
+        vkUnmapMemory(device_, quad_vertex_memory_);
+    } else {
+        SetError("Failed to map quad vertex buffer memory");
+        DestroyBuffer(quad_vertex_buffer_, quad_vertex_memory_);
+        return false;
+    }
+    
+    // Create index buffer
+    if (!CreateBuffer(
+        sizeof(indices),
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        quad_index_buffer_,
+        quad_index_memory_
+    )) {
+        SetError("Failed to create quad index buffer");
+        DestroyBuffer(quad_vertex_buffer_, quad_vertex_memory_);
+        return false;
+    }
+    
+    // Copy index data to GPU
+    void* index_data;
+    if (vkMapMemory(device_, quad_index_memory_, 0, sizeof(indices), 0, &index_data) == VK_SUCCESS) {
+        memcpy(index_data, indices, sizeof(indices));
+        vkUnmapMemory(device_, quad_index_memory_);
+    } else {
+        SetError("Failed to map quad index buffer memory");
+        DestroyBuffer(quad_vertex_buffer_, quad_vertex_memory_);
+        DestroyBuffer(quad_index_buffer_, quad_index_memory_);
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (" 
+              << sizeof(vertices) << " bytes) + index buffer (" << sizeof(indices) << " bytes)" << std::endl;
     return true;
 }
 
 bool VulkanRenderer::CreateInstanceBuffer() {
-    // Phase 5f Stub: Create dynamic instance data buffer
-    // TODO Phase 5g: Implement with CreateBuffer() helper
-    // - Allocate buffer large enough for MAX_SPRITES instance data
-    // - Used for transform, sprite data, colors, UV bounds per frame
-    std::cout << "[MantleRenderer] Phase 5f: CreateInstanceBuffer() - stub (Phase 5g implementation pending)" << std::endl;
+    // Phase 5g - Create dynamic instance data buffer for sprite rendering
+    
+    // Define maximum sprites that can be rendered in a single frame
+    const uint32_t MAX_SPRITES = 4096;  // Adjust based on performance needs
+    
+    // Instance data layout per sprite:
+    // - TransformPacket (28 bytes): position, rotation, scale, z_index
+    // - SpritePacket (32 bytes): texture_id, width, height, color, UV bounds
+    // Total: 60 bytes per sprite
+    // (We store this compact for efficient GPU transfer)
+    
+    uint32_t instance_data_size = MAX_SPRITES * (sizeof(TransformPacket) + sizeof(SpritePacket));
+    
+    // Create instance buffer with GPU-local memory (not host-visible for performance)
+    // Uses a staging buffer approach: write to staging, copy to device-local
+    if (!CreateBuffer(
+        instance_data_size,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,  // GPU-local for optimal performance
+        instance_buffer_,
+        instance_buffer_memory_
+    )) {
+        SetError("Failed to create instance buffer (size: %u bytes, max sprites: %u)",
+                 instance_data_size, MAX_SPRITES);
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (" 
+              << instance_data_size << " bytes for " << MAX_SPRITES << " sprites)" << std::endl;
+    return true;
+}
+
+bool VulkanRenderer::CreateStagingInstanceBuffer() {
+    // Phase 5h - Create host-accessible staging buffer for updating instance data
+    // This buffer allows us to map memory from CPU and update sprite data
+    // before copying to the device-local instance buffer
+    
+    const uint32_t MAX_SPRITES = 4096;
+    uint32_t instance_data_size = MAX_SPRITES * (sizeof(TransformPacket) + sizeof(SpritePacket));
+    
+    // Create buffer with host-visible and coherent memory for easy CPU updates
+    if (!CreateBuffer(
+        instance_data_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,  // Used as source for copy operations
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        staging_instance_buffer_,
+        staging_instance_memory_
+    )) {
+        SetError("Failed to create staging instance buffer (size: %u bytes)", instance_data_size);
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (" 
+              << instance_data_size << " bytes)" << std::endl;
     return true;
 }
 
 bool VulkanRenderer::CreateDescriptorSets() {
-    // Phase 5f Stub: Create descriptor set layout and pool for textures
-    // TODO Phase 5g: Implement with CreateDescriptorSetLayout()
-    // - Define descriptor set layout for sampler2D bindings
-    // - Create descriptor pool with capacity for texture count
-    // - Allocate descriptor sets (one per texture ID)
-    std::cout << "[MantleRenderer] Phase 5f: CreateDescriptorSets() - stub (Phase 5g implementation pending)" << std::endl;
+    // Phase 5g - Create descriptor set layout and pool for texture binding
+    
+    // Define descriptor set layout: one sampler2D binding
+    VkDescriptorSetLayoutBinding sampler_layout_binding = {};
+    sampler_layout_binding.binding = 0;
+    sampler_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    sampler_layout_binding.descriptorCount = 1;
+    sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    sampler_layout_binding.pImmutableSamplers = nullptr;
+    
+    VkDescriptorSetLayoutCreateInfo layout_info = {};
+    layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layout_info.bindingCount = 1;
+    layout_info.pBindings = &sampler_layout_binding;
+    
+    if (vkCreateDescriptorSetLayout(device_, &layout_info, nullptr, &descriptor_set_layout_) != VK_SUCCESS) {
+        SetError("Failed to create descriptor set layout");
+        return false;
+    }
+    
+    // Create descriptor pool to allocate descriptor sets
+    const uint32_t MAX_DESCRIPTOR_SETS = 256;  // Support up to 256 textures
+    
+    VkDescriptorPoolSize pool_size = {};
+    pool_size.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    pool_size.descriptorCount = MAX_DESCRIPTOR_SETS;
+    
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.poolSizeCount = 1;
+    pool_info.pPoolSizes = &pool_size;
+    pool_info.maxSets = MAX_DESCRIPTOR_SETS;
+    
+    if (vkCreateDescriptorPool(device_, &pool_info, nullptr, &descriptor_pool_) != VK_SUCCESS) {
+        SetError("Failed to create descriptor pool");
+        vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
+        return false;
+    }
+    
+    // Pre-allocate one descriptor set for placeholder texture
+    VkDescriptorSetAllocateInfo alloc_info = {};
+    alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    alloc_info.descriptorPool = descriptor_pool_;
+    alloc_info.descriptorSetCount = 1;
+    alloc_info.pSetLayouts = &descriptor_set_layout_;
+    
+    VkDescriptorSet placeholder_desc_set;
+    if (vkAllocateDescriptorSets(device_, &alloc_info, &placeholder_desc_set) != VK_SUCCESS) {
+        SetError("Failed to allocate descriptor set for placeholder texture");
+        vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
+        vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
+        return false;
+    }
+    
+    descriptor_sets_.push_back(placeholder_desc_set);
+    
+    std::cout << "[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max " 
+              << MAX_DESCRIPTOR_SETS << " textures)" << std::endl;
     return true;
 }
 
 bool VulkanRenderer::CreatePlaceholderTexture() {
-    // Phase 5f Stub: Create white placeholder texture
-    // TODO Phase 5g: Implement with VkImage creation and memory allocation
-    // - Create 1x1 white texture for fallback/testing
-    // - Allocate GPU memory and copy pixel data
-    std::cout << "[MantleRenderer] Phase 5f: CreatePlaceholderTexture() - stub (Phase 5g implementation pending)" << std::endl;
+    // Phase 5g - Create white placeholder texture (1x1 pixel)
+    
+    const uint32_t texture_width = 1;
+    const uint32_t texture_height = 1;
+    const uint32_t white_pixel = 0xFFFFFFFF;  // RGBA: white opaque
+    
+    // Create staging buffer for pixel data upload
+    VkBuffer staging_buffer;
+    VkDeviceMemory staging_memory;
+    
+    if (!CreateBuffer(
+        sizeof(white_pixel),
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        staging_buffer,
+        staging_memory
+    )) {
+        SetError("Failed to create staging buffer for placeholder texture");
+        return false;
+    }
+    
+    // Copy pixel data to staging buffer
+    void* staging_data;
+    if (vkMapMemory(device_, staging_memory, 0, sizeof(white_pixel), 0, &staging_data) == VK_SUCCESS) {
+        memcpy(staging_data, &white_pixel, sizeof(white_pixel));
+        vkUnmapMemory(device_, staging_memory);
+    } else {
+        SetError("Failed to map staging buffer for placeholder texture");
+        DestroyBuffer(staging_buffer, staging_memory);
+        return false;
+    }
+    
+    // Create VkImage (GPU texture)
+    VkImageCreateInfo image_info = {};
+    image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    image_info.imageType = VK_IMAGE_TYPE_2D;
+    image_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    image_info.extent.width = texture_width;
+    image_info.extent.height = texture_height;
+    image_info.extent.depth = 1;
+    image_info.mipLevels = 1;
+    image_info.arrayLayers = 1;
+    image_info.samples = VK_SAMPLE_COUNT_1_BIT;
+    image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    image_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    
+    if (vkCreateImage(device_, &image_info, nullptr, &placeholder_texture_) != VK_SUCCESS) {
+        SetError("Failed to create placeholder texture image");
+        DestroyBuffer(staging_buffer, staging_memory);
+        return false;
+    }
+    
+    // Allocate GPU memory for image
+    VkMemoryRequirements mem_requirements;
+    vkGetImageMemoryRequirements(device_, placeholder_texture_, &mem_requirements);
+    
+    uint32_t memory_type = FindMemoryType(mem_requirements.memoryTypeBits,
+                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    
+    VkMemoryAllocateInfo alloc_info = {};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = mem_requirements.size;
+    alloc_info.memoryTypeIndex = memory_type;
+    
+    if (vkAllocateMemory(device_, &alloc_info, nullptr, &placeholder_texture_memory_) != VK_SUCCESS) {
+        SetError("Failed to allocate GPU memory for placeholder texture");
+        vkDestroyImage(device_, placeholder_texture_, nullptr);
+        DestroyBuffer(staging_buffer, staging_memory);
+        return false;
+    }
+    
+    if (vkBindImageMemory(device_, placeholder_texture_, placeholder_texture_memory_, 0) != VK_SUCCESS) {
+        SetError("Failed to bind placeholder texture memory");
+        vkFreeMemory(device_, placeholder_texture_memory_, nullptr);
+        vkDestroyImage(device_, placeholder_texture_, nullptr);
+        DestroyBuffer(staging_buffer, staging_memory);
+        return false;
+    }
+    
+    // Copy staging buffer to image (via command buffer)
+    // Note: vkCmdCopyBufferToImage would require command buffer submission
+    // For now: store placeholder_texture for later use (Phase 5h)
+    // In production, this would transition image layout and copy data
+    
+    // Create image view for shader access
+    VkImageViewCreateInfo view_info = {};
+    view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    view_info.image = placeholder_texture_;
+    view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    view_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    view_info.subresourceRange.baseMipLevel = 0;
+    view_info.subresourceRange.levelCount = 1;
+    view_info.subresourceRange.baseArrayLayer = 0;
+    view_info.subresourceRange.layerCount = 1;
+    
+    if (vkCreateImageView(device_, &view_info, nullptr, &placeholder_texture_view_) != VK_SUCCESS) {
+        SetError("Failed to create placeholder texture image view");
+        vkFreeMemory(device_, placeholder_texture_memory_, nullptr);
+        vkDestroyImage(device_, placeholder_texture_, nullptr);
+        DestroyBuffer(staging_buffer, staging_memory);
+        return false;
+    }
+    
+    // Clean up staging buffer
+    DestroyBuffer(staging_buffer, staging_memory);
+    
+    std::cout << "[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created" << std::endl;
     return true;
 }
 
 bool VulkanRenderer::CreateTextureSampler() {
-    // Phase 5f Stub: Create VkSampler for texture filtering
-    // TODO Phase 5g: Implement with vkCreateSampler()
-    // - Configure magFilter, minFilter (LINEAR or NEAREST)
-    // - Configure addressMode (CLAMP_TO_EDGE or REPEAT)
-    std::cout << "[MantleRenderer] Phase 5f: CreateTextureSampler() - stub (Phase 5g implementation pending)" << std::endl;
+    // Phase 5g - Create VkSampler for texture filtering and addressing
+    
+    VkSamplerCreateInfo sampler_info = {};
+    sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    
+    // Linear filtering for smooth texture interpolation
+    sampler_info.magFilter = VK_FILTER_LINEAR;  // Magnification filter
+    sampler_info.minFilter = VK_FILTER_LINEAR;  // Minification filter
+    
+    // Address modes: CLAMP_TO_EDGE prevents texture bleeding at boundaries
+    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    
+    // Anisotropic filtering (optional, requires feature check)
+    sampler_info.anisotropyEnable = VK_FALSE;
+    sampler_info.maxAnisotropy = 1.0f;
+    
+    // Comparison settings (for shadow maps, not used here)
+    sampler_info.compareEnable = VK_FALSE;
+    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+    
+    // Mip levels
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    sampler_info.mipLodBias = 0.0f;
+    sampler_info.minLod = 0.0f;
+    sampler_info.maxLod = 0.0f;  // No mipmaps for simplicity
+    
+    if (vkCreateSampler(device_, &sampler_info, nullptr, &texture_sampler_) != VK_SUCCESS) {
+        SetError("Failed to create texture sampler");
+        return false;
+    }
+    
+    std::cout << "[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler" << std::endl;
     return true;
 }
 
@@ -1487,7 +1924,24 @@ void VulkanRenderer::DestroyBuffer(VkBuffer& buffer, VkDeviceMemory& memory) {
 
 void VulkanRenderer::UpdateInstanceData(uint32_t sprite_index, const SpritePacket& sprite,
                                         const TransformPacket& transform, uint8_t* data_ptr) {
-    // Phase 5f Stub: Copy sprite and transform data to instance buffer
-    // TODO Phase 5g: Implement memcpy or direct struct copies
-    (void)sprite_index; (void)sprite; (void)transform; (void)data_ptr;
+    // Phase 5g - Copy per-sprite transform and sprite data to GPU instance buffer
+    // Instance data layout (60 bytes per sprite):
+    //   [0-27]:   TransformPacket (28 bytes)
+    //   [28-59]:  SpritePacket (32 bytes)
+    
+    if (!data_ptr) {
+        return;  // Safety check
+    }
+    
+    // Calculate offset for this sprite in the instance data buffer
+    uint32_t bytes_per_sprite = sizeof(TransformPacket) + sizeof(SpritePacket);
+    uint32_t sprite_offset = sprite_index * bytes_per_sprite;
+    
+    // Copy transform data
+    uint8_t* transform_ptr = data_ptr + sprite_offset;
+    memcpy(transform_ptr, &transform, sizeof(TransformPacket));
+    
+    // Copy sprite data
+    uint8_t* sprite_ptr = data_ptr + sprite_offset + sizeof(TransformPacket);
+    memcpy(sprite_ptr, &sprite, sizeof(SpritePacket));
 }

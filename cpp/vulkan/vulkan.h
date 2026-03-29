@@ -137,4 +137,26 @@ VkResult vkCmdDrawIndexed(void* commandBuffer, uint32_t indexCount, uint32_t ins
 VkResult vkCmdAllocateCommandBuffers(VkDevice device, const void* pAllocateInfo, void* pCommandBuffers);
 VkResult vkFreeCommandBuffers(VkDevice device, VkCommandPool commandPool, uint32_t commandBufferCount, const void* const* pCommandBuffers);
 
+// Phase 5g: Descriptor sets, textures, and  samplers
+VkResult vkCreateDescriptorSetLayout(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pSetLayout);
+void vkDestroyDescriptorSetLayout(VkDevice device, void* descriptorSetLayout, const void* pAllocator);
+VkResult vkCreateDescriptorPool(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pDescriptorPool);
+void vkDestroyDescriptorPool(VkDevice device, void* descriptorPool, const void* pAllocator);
+VkResult vkAllocateDescriptorSets(VkDevice device, const void* pAllocateInfo, void* pDescriptorSets);
+VkResult vkFreeDescriptorSets(VkDevice device, void* descriptorPool, uint32_t descriptorSetCount, const void* const* pDescriptorSets);
+VkResult vkCreateSampler(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pSampler);
+void vkDestroySampler(VkDevice device, void* sampler, const void* pAllocator);
+VkResult vkCreateImage(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pImage);
+void vkDestroyImage(VkDevice device, void* image, const void* pAllocator);
+VkResult vkCreateImageView(VkDevice device, const void* pCreateInfo, const void* pAllocator, void* pView);
+void vkDestroyImageView(VkDevice device, void* imageView, const void* pAllocator);
+void vkGetImageMemoryRequirements(VkDevice device, void* image, void* pMemoryRequirements);
+VkResult vkBindImageMemory(VkDevice device, void* image, void* memory, uint64_t memoryOffset);
+
+// Phase 5g: Descriptor set binding and pipeline bind points
+VkResult vkCmdBindDescriptorSets(void* commandBuffer, uint32_t pipelineBindPoint, void* layout,
+                                 uint32_t firstSet, uint32_t descriptorSetCount,
+                                 const void* const* pDescriptorSets, uint32_t dynamicOffsetCount,
+                                 const uint32_t* pDynamicOffsets);
+
 #endif // VULKAN_H_

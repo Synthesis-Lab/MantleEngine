@@ -695,4 +695,206 @@ enum VkCommandBufferLevel {
     VK_COMMAND_BUFFER_LEVEL_SECONDARY = 1,
 };
 
+// Boolean type and constants
+typedef uint32_t VkBool32;
+#define VK_TRUE  1
+#define VK_FALSE 0
+
+// Filter enum for texture sampling
+enum VkFilter {
+    VK_FILTER_NEAREST = 0,
+    VK_FILTER_LINEAR = 1,
+};
+
+// Sampler address mode enum
+enum VkSamplerAddressMode {
+    VK_SAMPLER_ADDRESS_MODE_REPEAT = 0,
+    VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER = 3,
+};
+
+// Sampler mipmap mode enum
+enum VkSamplerMipmapMode {
+    VK_SAMPLER_MIPMAP_MODE_NEAREST = 0,
+    VK_SAMPLER_MIPMAP_MODE_LINEAR = 1,
+};
+
+// Compare operation enum
+enum VkCompareOp {
+    VK_COMPARE_OP_NEVER = 0,
+    VK_COMPARE_OP_LESS = 1,
+    VK_COMPARE_OP_EQUAL = 2,
+    VK_COMPARE_OP_LESS_OR_EQUAL = 3,
+    VK_COMPARE_OP_GREATER = 4,
+    VK_COMPARE_OP_NOT_EQUAL = 5,
+    VK_COMPARE_OP_GREATER_OR_EQUAL = 6,
+    VK_COMPARE_OP_ALWAYS = 7,
+};
+
+// Image tiling enum
+enum VkImageTiling {
+    VK_IMAGE_TILING_OPTIMAL = 0,
+    VK_IMAGE_TILING_LINEAR = 1,
+};
+
+// Image type enum
+enum VkImageType {
+    VK_IMAGE_TYPE_1D = 0,
+    VK_IMAGE_TYPE_2D = 1,
+    VK_IMAGE_TYPE_3D = 2,
+};
+
+// Image view type enum
+enum VkImageViewType {
+    VK_IMAGE_VIEW_TYPE_1D = 0,
+    VK_IMAGE_VIEW_TYPE_2D = 1,
+    VK_IMAGE_VIEW_TYPE_3D = 2,
+    VK_IMAGE_VIEW_TYPE_CUBE = 3,
+};
+
+// Image aspect flag bits
+enum VkImageAspectFlagBits {
+    VK_IMAGE_ASPECT_COLOR_BIT = 0x00000001,
+    VK_IMAGE_ASPECT_DEPTH_BIT = 0x00000002,
+    VK_IMAGE_ASPECT_STENCIL_BIT = 0x00000004,
+};
+typedef uint32_t VkImageAspectFlags;
+
+// Image usage flag bits
+enum VkImageUsageFlagBits {
+    VK_IMAGE_USAGE_TRANSFER_DST_BIT = 0x00000002,
+    VK_IMAGE_USAGE_SAMPLED_BIT = 0x00000004,
+    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT = 0x00000010,
+};
+typedef uint32_t VkImageUsageFlags;
+
+// Sampler create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    VkFilter magFilter;
+    VkFilter minFilter;
+    VkSamplerMipmapMode mipmapMode;
+    VkSamplerAddressMode addressModeU;
+    VkSamplerAddressMode addressModeV;
+    VkSamplerAddressMode addressModeW;
+    float mipLodBias;
+    VkBool32 anisotropyEnable;
+    float maxAnisotropy;
+    VkBool32 compareEnable;
+    VkCompareOp compareOp;
+    float minLod;
+    float maxLod;
+    uint32_t borderColor;
+    VkBool32 unnormalizedCoordinates;
+} VkSamplerCreateInfo;
+
+// Image extent (size)
+typedef struct {
+    uint32_t width;
+    uint32_t height;
+    uint32_t depth;
+} VkExtent3D;
+
+// Image create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    VkImageType imageType;
+    VkFormat format;
+    VkExtent3D extent;
+    uint32_t mipLevels;
+    uint32_t arrayLayers;
+    uint32_t samples;
+    VkImageTiling tiling;
+    VkImageUsageFlags usage;
+    uint32_t sharingMode;
+    uint32_t queueFamilyIndexCount;
+    const uint32_t* pQueueFamilyIndices;
+    uint32_t initialLayout;
+} VkImageCreateInfo;
+
+// Image subresource range
+typedef struct {
+    VkImageAspectFlags aspectMask;
+    uint32_t baseMipLevel;
+    uint32_t levelCount;
+    uint32_t baseArrayLayer;
+    uint32_t layerCount;
+} VkImageSubresourceRange;
+
+// Image view create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    void* image;  // VkImage
+    VkImageViewType viewType;
+    VkFormat format;
+    uint32_t components;  // VkComponentMapping
+    VkImageSubresourceRange subresourceRange;
+} VkImageViewCreateInfo;
+
+// Descriptor set layout binding
+typedef struct {
+    uint32_t binding;
+    uint32_t descriptorType;
+    uint32_t descriptorCount;
+    uint32_t stageFlags;
+    const void* pImmutableSamplers;
+} VkDescriptorSetLayoutBinding;
+
+// Descriptor set layout create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t bindingCount;
+    const VkDescriptorSetLayoutBinding* pBindings;
+} VkDescriptorSetLayoutCreateInfo;
+
+// Descriptor pool size
+typedef struct {
+    uint32_t type;  // VkDescriptorType
+    uint32_t descriptorCount;
+} VkDescriptorPoolSize;
+
+// Descriptor pool create info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    uint32_t flags;
+    uint32_t maxSets;
+    uint32_t poolSizeCount;
+    const VkDescriptorPoolSize* pPoolSizes;
+} VkDescriptorPoolCreateInfo;
+
+// Descriptor set allocate info
+typedef struct {
+    VkStructureType sType;
+    const void* pNext;
+    void* descriptorPool;
+    uint32_t descriptorSetCount;
+    const void* pSetLayouts;  // VkDescriptorSetLayout*
+} VkDescriptorSetAllocateInfo;
+
+// Descriptor type enum
+enum VkDescriptorType {
+    VK_DESCRIPTOR_TYPE_SAMPLER = 0,
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 1,
+    VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE = 2,
+    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE = 3,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER = 6,
+};
+
+// Index type enum  
+enum VkIndexType {
+    VK_INDEX_TYPE_UINT16 = 0,
+    VK_INDEX_TYPE_UINT32 = 1,
+};
+
+// Vulkan structures and definitions end
 #endif // VULKAN_STRUCT_H_

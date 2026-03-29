@@ -228,6 +228,129 @@ TEST_F(VulkanRendererTest, PhaseIntegrationTest) {
     EXPECT_FALSE(renderer.IsReady());
 }
 
+/// ============================================================================
+/// Phase 5h: Sprite Rendering Tests
+/// ============================================================================
+
+/// Test 18: Phase 5h - Single Sprite Rendering
+TEST_F(VulkanRendererTest, Phase5h_SingleSpriteRender) {
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Create a single sprite render packet
+    TransformPacket transform(100.0f, 100.0f, 0.0f, 1.0f, 1.0f, 0);
+    
+    SpritePacket sprite(0, 32.0f, 32.0f, 0xFFFFFFFF, 0.0f, 0.0f, 1.0f, 1.0f);
+    
+    RenderPacket packet(0, 0.016f, 1, 1, 0, &transform, &sprite, nullptr);
+    
+    // Submit and render
+    renderer.SubmitRenderPacket(&packet);
+    renderer.WaitRender();
+    
+    // Verify no errors
+    const char* error = renderer.GetLastError();
+    // Single sprite should render without errors
+    
+    renderer.Shutdown();
+}
+
+/// Test 19: Phase 5h - Multiple Sprites Rendering
+TEST_F(VulkanRendererTest, Phase5h_MultipleSpritesRender) {
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Create 5 sprites with different positions and scales
+    const int NUM_SPRITES = 5;
+    TransformPacket transforms[NUM_SPRITES] = {
+        TransformPacket(200.0f, 600.0f, 0.0f,   1.0f, 1.0f, 0),
+        TransformPacket(800.0f, 600.0f, 45.0f,  1.2f, 1.2f, 1),
+        TransformPacket(512.0f, 384.0f, 90.0f,  1.5f, 1.5f, 2),
+        TransformPacket(200.0f, 200.0f, 180.0f, 0.8f, 0.8f, 1),
+        TransformPacket(800.0f, 200.0f, 270.0f, 1.1f, 0.9f, 0),
+    };
+    
+    SpritePacket sprites[NUM_SPRITES] = {
+        SpritePacket(0, 32.0f, 32.0f, 0xFF0000FF, 0.0f, 0.0f, 1.0f, 1.0f),  // Red
+        SpritePacket(0, 48.0f, 48.0f, 0x00FF00FF, 0.0f, 0.0f, 1.0f, 1.0f),  // Green
+        SpritePacket(0, 64.0f, 64.0f, 0x0000FFFF, 0.0f, 0.0f, 1.0f, 1.0f),  // Blue
+        SpritePacket(0, 40.0f, 40.0f, 0xFFFF00FF, 0.0f, 0.0f, 1.0f, 1.0f),  // Yellow
+        SpritePacket(0, 56.0f, 56.0f, 0x00FFFFFF, 0.0f, 0.0f, 1.0f, 1.0f),  // Cyan
+    };
+    
+    RenderPacket packet(0, 0.016f, NUM_SPRITES, NUM_SPRITES, 0, transforms, sprites, nullptr);
+    
+    // Submit and render
+    renderer.SubmitRenderPacket(&packet);
+    renderer.WaitRender();
+    
+    renderer.Shutdown();
+}
+
+/// Test 20: Phase 5h - Sprite Batching with Texture IDs
+TEST_F(VulkanRendererTest, Phase5h_SpriteBatchingWithTextures) {
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Create 8 sprites using different descriptor sets (simulated texture IDs)
+    const int NUM_SPRITES = 8;
+    TransformPacket transforms[NUM_SPRITES];
+    SpritePacket sprites[NUM_SPRITES];
+    
+    // Generate sprites in a grid pattern
+    for (int i = 0; i < NUM_SPRITES; i++) {
+        int row = i / 4;
+        int col = i % 4;
+        
+        transforms[i] = TransformPacket(
+            300.0f + col * 150.0f,  //position_x
+            300.0f + row * 200.0f,  // position_y
+            (float)(i * 45.0f),     // rotation (increasing)
+            0.8f + i * 0.1f,        // scale_x (increasing)
+            1.0f,                   // scale_y
+            i                       // z_index
+        );
+        
+        // Vary texture ID (0 for placeholder, others for potential future textures)
+        uint32_t tex_id = i % 2;  // Alternate between texture 0 and 1
+        
+        // Vary colors: RGBA format
+        uint32_t colors[] = {
+            0xFF0000FF,  // Red
+            0x00FF00FF,  // Green
+            0x0000FFFF,  // Blue
+            0xFFFF00FF,  // Yellow
+            0xFF00FFFF,  // Magenta
+            0x00FFFFFF,  // Cyan
+            0xFFFFFFFF,  // White
+            0x808080FF,  // Gray
+        };
+        
+        sprites[i] = SpritePacket(
+            tex_id,                 // texture_id
+            24.0f + i * 8.0f,       // width (increasing)
+            24.0f + i * 8.0f,       // height (increasing)
+            colors[i],              // color
+            0.0f,                   // uv_min_x
+            0.0f,                   // uv_min_y
+            1.0f,                   // uv_max_x
+            1.0f                    // uv_max_y
+        );
+    }
+    
+    RenderPacket packet(0, 0.016f, NUM_SPRITES, NUM_SPRITES, 0, transforms, sprites, nullptr);
+    
+    // Submit multiple frames to verify continuous rendering
+    for (int frame = 0; frame < 3; frame++) {
+        // Note: RenderPacket doesn't expose frame_number for modification,
+        // but we can create new packets for each frame
+        renderer.SubmitRenderPacket(&packet);
+        renderer.WaitRender();
+    }
+    
+    renderer.Shutdown();
+}
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

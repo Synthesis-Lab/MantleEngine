@@ -128,6 +128,10 @@ private:
     VkBuffer instance_buffer_;          // Dynamic instance data (copied per frame)
     VkDeviceMemory instance_buffer_memory_;
     
+    // Phase 5h: Staging buffer for instance data updates (host-accessible)
+    VkBuffer staging_instance_buffer_;
+    VkDeviceMemory staging_instance_memory_;
+    
     // Phase 5f: Descriptor sets for texture binding
     VkDescriptorSetLayout descriptor_set_layout_;
     VkDescriptorPool descriptor_pool_;
@@ -173,6 +177,7 @@ private:
     // Phase 5f: GPU Buffer Creation & Management
     bool CreateQuadGeometry();           // Create vertex/index buffers for quad
     bool CreateInstanceBuffer();         // Create dynamic instance data buffer
+    bool CreateStagingInstanceBuffer();  // Create host-accessible staging buffer for updates
     bool CreateDescriptorSets();         // Create descriptor set layout and pool
     bool CreatePlaceholderTexture();     // Create white texture fallback
     bool CreateTextureSampler();         // Create VkSampler for texture filtering
@@ -193,7 +198,7 @@ private:
     bool AllocateCommandBuffers();
     bool CreateFence();
     void DestroyFence();
-    bool RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t image_index);
+    bool RecordRenderCommands(VkCommandBuffer cmd_buffer, uint32_t image_index, const RenderPacket* packet);
     bool SubmitFrame(uint32_t image_index);
     
     // Helper methods for rendering
