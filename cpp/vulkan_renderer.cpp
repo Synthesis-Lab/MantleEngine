@@ -344,9 +344,10 @@ void VulkanRenderer::WaitRender() {
         return;
     }
     
-    // Phase 4: Wait for current frame to complete
-    // This should synchronize with GPU via vkWaitForFences
-    // For skeleton: just increment frame counter
+    // Phase 5: Render frame (will dump frame to PPM)
+    // For testing: render empty frame or with pending packets
+    RenderFrame(nullptr);
+    
     frame_number_++;
 }
 
@@ -410,15 +411,15 @@ void VulkanRenderer::RenderFrame(const RenderPacket* packet) {
     //
     // Called by SubmitRenderPacket() to process one frame's rendering data
     //
-    if (!packet) {
-        SetError("RenderFrame called with null packet");
-        return;
+    if (packet) {
+        std::cout << "[MantleRenderer] Frame " << packet->frame_number 
+                  << ": " << packet->transform_count << " transforms, "
+                  << packet->sprite_count << " sprites, "
+                  << packet->collider_count << " colliders" << std::endl;
     }
     
-    std::cout << "[MantleRenderer] Frame " << packet->frame_number 
-              << ": " << packet->transform_count << " transforms, "
-              << packet->sprite_count << " sprites, "
-              << packet->collider_count << " colliders" << std::endl;
+    // Always dump the frame (for testing/visualization)
+    DumpCurrentFrame(0);
     
     // Phase 5+: Full frame rendering pipeline
     // 1. vkAcquireNextImageKHR(swapchain_, timeout, image_acquired_semaphore_, ...)
