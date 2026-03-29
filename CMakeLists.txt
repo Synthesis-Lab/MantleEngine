@@ -1,5 +1,10 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.25)
 project(MantleEngine VERSION 0.4.0 LANGUAGES C CXX)
+
+# Set C++ standard globally
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set default build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -41,7 +46,7 @@ message(STATUS "")
 message(STATUS "MantleEngine v0.4.0 Configuration")
 message(STATUS "==================================")
 message(STATUS "Build Type:        ${CMAKE_BUILD_TYPE}")
-message(STATUS "C++ Standard:      17")
+message(STATUS "C++ Standard:      ${CMAKE_CXX_STANDARD}")
 message(STATUS "Rust Integration:  Corrosion ${Corrosion_VERSION}")
 message(STATUS "Vulkan Renderer:   Enabled")
 message(STATUS "")

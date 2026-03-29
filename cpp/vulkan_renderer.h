@@ -1,6 +1,7 @@
 #ifndef MANTLE_VULKAN_RENDERER_H
 #define MANTLE_VULKAN_RENDERER_H
 
+#include "renderer.h"
 #include "render_packet.h"
 #include <cstdint>
 #include <memory>
@@ -46,45 +47,51 @@ typedef VkDescriptorPool_T* VkDescriptorPool;
 typedef VkDescriptorSet_T* VkDescriptorSet;
 typedef VkSampler_T* VkSampler;
 
-/// VulkanRenderer - Core 2D rendering engine
-/// Manages Vulkan initialization, command buffers, and rendering pipeline
-class VulkanRenderer {
+/// VulkanRenderer - Vulkan 1.2+ rendering backend
+/// Implements the Renderer interface using Vulkan API
+class VulkanRenderer final : public Renderer {
 public:
     /// Constructor - initializes Vulkan instance
     VulkanRenderer();
     
     /// Destructor - cleans up Vulkan resources
-    ~VulkanRenderer();
+    ~VulkanRenderer() override;
     
     /// Initialize the renderer (called from mantle_renderer_init)
     /// Sets up instance, device, queues, command pools
     /// Returns true on success
-    bool Initialize();
+    bool Initialize() override;
     
     /// Shutdown the renderer and free all Vulkan resources
-    void Shutdown();
+    void Shutdown() override;
     
     /// Check if renderer is ready to receive render packets
-    bool IsReady() const;
+    bool IsReady() const override;
     
     /// Submit a render packet for processing
     /// Queues the render packet for the next available frame
-    void SubmitRenderPacket(const RenderPacket* packet);
+    void SubmitRenderPacket(const RenderPacket* packet) override;
     
     /// Wait for rendering to complete
     /// Blocks until the current frame has been processed
-    void WaitRender();
+    void WaitRender() override;
     
     /// Upload vertex/index buffer data to GPU
     /// Returns a texture/buffer ID for use in RenderPackets
-    uint32_t UploadBuffer(const void* data, uint32_t size);
+    uint32_t UploadBuffer(const void* data, uint32_t size) override;
     
     /// Get the last error message (for C ABI error reporting)
-    const char* GetLastError() const;
+    const char* GetLastError() const override;
     
     /// Render a single frame from a RenderPacket
     /// Called by WaitRender or automatically per frame
-    void RenderFrame(const RenderPacket* packet);
+    void RenderFrame(const RenderPacket* packet) override;
+    
+    /// Get renderer type
+    Type GetType() const override { return Type::VULKAN; }
+    
+    /// Get renderer name
+    const char* GetName() const override { return "Vulkan 1.2+"; }
 
 private:
     // Vulkan handle members
