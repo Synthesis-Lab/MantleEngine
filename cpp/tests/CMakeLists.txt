@@ -9,7 +9,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# Test executable
+# Vulkan Test executable
 add_executable(test_vulkan_renderer
     test_vulkan_renderer.cpp
 )
@@ -21,5 +21,20 @@ target_link_libraries(test_vulkan_renderer
         gtest_main
 )
 
-# Register test
+# Register Vulkan test
 add_test(NAME VulkanRendererTests COMMAND test_vulkan_renderer)
+
+# OpenGL Test executable
+add_executable(test_opengl_renderer
+    test_opengl_renderer.cpp
+)
+
+target_link_libraries(test_opengl_renderer
+    PRIVATE
+        mantle_renderer
+        gtest
+        gtest_main
+)
+
+# Register OpenGL test
+add_test(NAME OpenGLRendererTests COMMAND test_opengl_renderer)
