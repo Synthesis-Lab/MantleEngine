@@ -487,6 +487,9 @@ void OpenGLRenderer::RenderFrame(const RenderPacket* packet) {
                   << packet->sprite_count << " sprites" << std::endl;
     }
     
+    // Phase 5b+5c: CPU-side software rasterization (for headless/stub mode)
+    RasterizeSprites(packet);
+    
     // Always dump the frame (for testing/visualization)
     DumpCurrentFrame();
 }
@@ -742,6 +745,70 @@ bool OpenGLRenderer::CreatePlaceholderTexture() {
     
     std::cout << "[MantleRenderer] Placeholder texture created" << std::endl;
     return true;
+}
+
+void OpenGLRenderer::RasterizeSprites(const RenderPacket* packet) {
+    // CPU-side software rasterization for headless/stub GPU mode
+    // Initialize pixel buffer with green background (Phase 5h signature)
+    if (pixel_buffer_.empty()) {
+        pixel_buffer_.resize(window_width_ * window_height_ * 4, 0);  // RGBA
+    }
+    
+    // Fill background: green (0, 127, 0, 255)
+    for (size_t i = 0; i < pixel_buffer_.size(); i += 4) {
+        pixel_buffer_[i + 0] = 0;      // R
+        pixel_buffer_[i + 1] = 127;    // G
+        pixel_buffer_[i + 2] = 0;      // B
+        pixel_buffer_[i + 3] = 255;    // A
+    }
+    
+    // Render sprites as rectangles
+    if (packet && packet->sprite_count > 0) {
+        for (uint32_t i = 0; i < packet->sprite_count && i < packet->transform_count; ++i) {
+            const TransformPacket& transform = packet->transforms[i];
+            const SpritePacket& sprite = packet->sprites[i];
+            
+            // Decode sprite color (0xRRGGBBAA)
+            uint8_t r = (sprite.color >> 24) & 0xFF;
+            uint8_t g = (sprite.color >> 16) & 0xFF;
+            uint8_t b = (sprite.color >> 8) & 0xFF;
+            uint8_t a = (sprite.color & 0xFF);
+            
+            // Simple rectangle rasterization (no rotation/scale for simplicity)
+            // Position in screen space: normalize from -1..1 to 0..1024, 0..768
+            int center_x = (int)((transform.position_x + 1.0f) / 2.0f * window_width_);
+            int center_y = (int)((transform.position_y + 1.0f) / 2.0f * window_height_);
+            
+            // Apply scale to half-width/height
+            int half_w = (int)(sprite.width * transform.scale_x / 2.0f);
+            int half_h = (int)(sprite.height * transform.scale_y / 2.0f);
+            
+            // Draw filled rectangle
+            int x_min = center_x - half_w;
+            int x_max = center_x + half_w;
+            int y_min = center_y - half_h;
+            int y_max = center_y + half_h;
+            
+            // Clamp to framebuffer bounds
+            x_min = (x_min < 0) ? 0 : x_min;
+            x_max = (x_max >= (int)window_width_) ? (int)window_width_ - 1 : x_max;
+            y_min = (y_min < 0) ? 0 : y_min;
+            y_max = (y_max >= (int)window_height_) ? (int)window_height_ - 1 : y_max;
+            
+            // Rasterize rectangle: iterate and set pixels
+            for (int py = y_min; py <= y_max; ++py) {
+                for (int px = x_min; px <= x_max; ++px) {
+                    uint32_t pixel_idx = py * window_width_ + px;
+                    if (pixel_idx * 4 + 3 < pixel_buffer_.size()) {
+                        pixel_buffer_[pixel_idx * 4 + 0] = r;  // R
+                        pixel_buffer_[pixel_idx * 4 + 1] = g;  // G
+                        pixel_buffer_[pixel_idx * 4 + 2] = b;  // B
+                        pixel_buffer_[pixel_idx * 4 + 3] = a;  // A
+                    }
+                }
+            }
+        }
+    }
 }
 
 void OpenGLRenderer::DumpCurrentFrame() {

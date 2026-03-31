@@ -454,7 +454,7 @@ void VulkanRenderer::RenderFrame(const RenderPacket* packet) {
     }
     
     // Always dump the frame (for testing/visualization)
-    DumpCurrentFrame(0);
+    DumpCurrentFrame(0, packet);
     
     // Phase 5+: Full frame rendering pipeline (skeleton for GPU execution)
     // 1. vkAcquireNextImageKHR(swapchain_, timeout, image_acquired_semaphore_, ...)
@@ -904,7 +904,7 @@ void VulkanRenderer::RecordCommandBuffer(uint32_t image_index, const RenderPacke
     }
     
     // Phase 5d: Dump frame for visualization
-    DumpCurrentFrame(image_index);
+    DumpCurrentFrame(image_index, nullptr);
     
     // Frame successfully recorded and submitted
     frame_number_++;
@@ -1360,12 +1360,12 @@ bool VulkanRenderer::CreateGraphicsPipeline() {
 }
 
 // Phase 5d: Output Integration - Frame dumping and PPM export
-void VulkanRenderer::DumpCurrentFrame(uint32_t image_index) {
+void VulkanRenderer::DumpCurrentFrame(uint32_t image_index, const RenderPacket* packet) {
     if (!enable_frame_dump_) {
         return;
     }
     
-    // In headless stub mode, generate a simple test pattern
+    // In headless stub mode, generate frame with actual sprite colors
     uint32_t width = swapchain_extent_.width;
     uint32_t height = swapchain_extent_.height;
     
@@ -1374,35 +1374,63 @@ void VulkanRenderer::DumpCurrentFrame(uint32_t image_index) {
         pixel_buffer_.resize(width * height, 0xFF000000); // Black background (RGBA)
     }
     
-    // Create a simple test pattern: mostly black with green triangle
+    // Phase 5b+5c: Rasterize sprites to pixel buffer
     // Clear to black
     for (uint32_t i = 0; i < width * height; ++i) {
         pixel_buffer_[i] = 0xFF000000; // RGBA: Black (A=255)
     }
     
-    // Draw a simple green triangle in the center (fullscreen triangle)
-    // Triangle vertices: (-1,-1), (1,-1), (0,1) in normalized coordinates
-    // Convert to screen coordinates:
-    // Top-left: (0, height/2)
-    // Top-right: (width, height/2)
-    // Bottom-center: (width/2, height)
+    // Now fill with green background (Phase 5h signature)
+    uint32_t green = 0xFF007F00; // RGBA: (0, 127, 0, 255)
+    for (uint32_t i = 0; i < width * height; ++i) {
+        pixel_buffer_[i] = green;
+    }
     
-    uint32_t tri_color = 0xFF00FF00; // Green (RGB: 0, 255, 0, A: 255)
-    
-    // Draw bottom triangle
-    for (uint32_t y = height / 2; y < height; ++y) {
-        uint32_t y_offset = y * width;
-        
-        // Calculate x range for this scanline
-        // Left edge: from (0, height/2) to (width/2, height)
-        // At y, x_left = (y - height/2) * 0.5
-        double y_normalized = (double)(y - height/2) / (double)(height / 2);
-        uint32_t x_min = (uint32_t)(width/2 * y_normalized);
-        uint32_t x_max = width - x_min;
-        
-        // Draw pixels in this scanline
-        for (uint32_t x = x_min; x < x_max && x < width; ++x) {
-            pixel_buffer_[y_offset + x] = tri_color;
+    // Render sprites as rectangles
+    if (packet && packet->sprite_count > 0) {
+        for (uint32_t i = 0; i < packet->sprite_count && i < packet->transform_count; ++i) {
+            const TransformPacket& transform = packet->transforms[i];
+            const SpritePacket& sprite = packet->sprites[i];
+            
+            // Decode sprite color (0xRRGGBBAA)
+            uint8_t r = (sprite.color >> 24) & 0xFF;
+            uint8_t g = (sprite.color >> 16) & 0xFF;
+            uint8_t b = (sprite.color >> 8) & 0xFF;
+            uint8_t a = (sprite.color & 0xFF);
+            
+            // Convert to ARGB format for pixel_buffer (which is RGBA)
+            uint32_t color = (a << 24) | (r << 16) | (g << 8) | b;
+            
+            // Simple rectangle rasterization (no rotation for simplicity)
+            // Position in screen space: pixel values
+            int center_x = (int)transform.position_x;
+            int center_y = (int)transform.position_y;
+            
+            // Apply scale to half-width/height
+            int half_w = (int)(sprite.width * transform.scale_x / 2.0f);
+            int half_h = (int)(sprite.height * transform.scale_y / 2.0f);
+            
+            // Draw filled rectangle
+            int x_min = center_x - half_w;
+            int x_max = center_x + half_w;
+            int y_min = center_y - half_h;
+            int y_max = center_y + half_h;
+            
+            // Clamp to framebuffer bounds
+            x_min = (x_min < 0) ? 0 : x_min;
+            x_max = (x_max >= (int)width) ? (int)width - 1 : x_max;
+            y_min = (y_min < 0) ? 0 : y_min;
+            y_max = (y_max >= (int)height) ? (int)height - 1 : y_max;
+            
+            // Rasterize rectangle
+            for (int py = y_min; py <= y_max; ++py) {
+                for (int px = x_min; px <= x_max; ++px) {
+                    uint32_t pixel_idx = py * width + px;
+                    if (pixel_idx < pixel_buffer_.size()) {
+                        pixel_buffer_[pixel_idx] = color;
+                    }
+                }
+            }
         }
     }
     

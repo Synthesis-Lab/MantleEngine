@@ -215,7 +215,7 @@ private:
     void RenderColliders(VkCommandBuffer cmd_buffer, const RenderPacket* packet);
     
     // Phase 5d: Output and frame dumping
-    void DumpCurrentFrame(uint32_t image_index);
+    void DumpCurrentFrame(uint32_t image_index, const RenderPacket* packet = nullptr);
     bool SaveFrameToPPM(const char* filename, uint32_t width, uint32_t height);
     
     // Error reporting

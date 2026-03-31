@@ -103,6 +103,9 @@ private:
     bool CreateTextureSampler();
     bool CreatePlaceholderTexture();
     
+    // CPU-side software rendering for headless mode
+    void RasterizeSprites(const RenderPacket* packet);
+    
     void DumpCurrentFrame();
     bool SaveFrameToPPM(const char* filename, uint32_t width, uint32_t height);
     
