@@ -411,17 +411,52 @@ void VulkanRenderer::RenderFrame(const RenderPacket* packet) {
     //
     // Called by SubmitRenderPacket() to process one frame's rendering data
     //
-    if (packet) {
+    
+    // Phase 5b/5c: Batch render all sprites with their transforms
+    if (packet && packet->sprite_count > 0) {
+        // Log rendering statistics
+        std::cout << "[MantleRenderer] Frame " << packet->frame_number 
+                  << ": Batch rendering " << packet->sprite_count << " sprites" << std::endl;
+        
+        // Render each sprite with its associated transform
+        for (uint32_t i = 0; i < packet->sprite_count && i < packet->transform_count; ++i) {
+            const TransformPacket& transform = packet->transforms[i];
+            const SpritePacket& sprite = packet->sprites[i];
+            
+            // Phase 5c: Process transform matrix
+            // In actual Vulkan, this would be uploaded to GPU via:
+            // - Push constants (small data like transform matrices)
+            // - Uniform buffers (shared across multiple draw calls)
+            // - Storage buffers (instance data for batched rendering)
+            
+            // Log sprite rendering (verbose mode for debugging)
+            std::cout << "[MantleRenderer] Sprite " << i 
+                      << ": pos=(" << transform.position_x << "," << transform.position_y 
+                      << ") rot=" << transform.rotation 
+                      << "° scale=(" << transform.scale_x << "," << transform.scale_y << ")"
+                      << " color=0x" << std::hex << sprite.color << std::dec << std::endl;
+            
+            // In actual Vulkan Phase 5c implementation:
+            // 1. Calculate 2D TRS matrix (same as OpenGL)
+            // 2. vkCmdPushConstants() or buffer update for transform
+            // 3. vkCmdDrawIndexed() or instanced draw for sprite quad
+            // 4. Color blending from SpritePacket.color
+        }
+    } else if (packet) {
+        // Fallback: render empty frame or with transforms only
         std::cout << "[MantleRenderer] Frame " << packet->frame_number 
                   << ": " << packet->transform_count << " transforms, "
                   << packet->sprite_count << " sprites, "
-                  << packet->collider_count << " colliders" << std::endl;
+                  << packet->collider_count << " colliders (no batch)" << std::endl;
+    } else {
+        // No packet provided (Phase 5a compatibility)
+        std::cout << "[MantleRenderer] Rendering empty frame" << std::endl;
     }
     
     // Always dump the frame (for testing/visualization)
     DumpCurrentFrame(0);
     
-    // Phase 5+: Full frame rendering pipeline
+    // Phase 5+: Full frame rendering pipeline (skeleton for GPU execution)
     // 1. vkAcquireNextImageKHR(swapchain_, timeout, image_acquired_semaphore_, ...)
     //    - Wait for swapchain image to be available
     //    - Get image_index for current frame

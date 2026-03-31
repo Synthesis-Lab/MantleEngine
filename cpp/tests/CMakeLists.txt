@@ -38,3 +38,16 @@ target_link_libraries(test_opengl_renderer
 
 # Register OpenGL test
 add_test(NAME OpenGLRendererTests COMMAND test_opengl_renderer)
+
+# Visual Comparison executable (Phase 5b+5c demo)
+add_executable(visual_comparison
+    visual_comparison.cpp
+)
+
+target_link_libraries(visual_comparison
+    PRIVATE
+        mantle_renderer
+)
+
+# This is a demo program, not a test
+# Run with: ./visual_comparison

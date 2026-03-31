@@ -1,6 +1,8 @@
 #include "opengl_renderer.h"
 #include <iostream>
 #include <cstdarg>
+#include <cmath>
+#include <cmath>
 
 // GLFW3 headers (conditional based on USE_GLFW3)
 #ifdef USE_GLFW3
@@ -191,6 +193,17 @@ inline void glGetProgramInfoLog_stub(unsigned int program, int maxLength, int *l
 #endif
 #ifndef glfwTerminate
 #define glfwTerminate() ((void)0)
+#endif
+
+// Uniform function stubs for Phase 5b+5c (batch rendering with transforms)
+#ifndef glGetUniformLocation
+#define glGetUniformLocation(program, name) 0
+#endif
+#ifndef glUniformMatrix4fv
+#define glUniformMatrix4fv(location, count, transpose, value) ((void)0)
+#endif
+#ifndef glUniform4f
+#define glUniform4f(location, x, y, z, w) ((void)0)
 #endif
 
 // ============================================================================
@@ -388,7 +401,7 @@ void OpenGLRenderer::RenderFrame(const RenderPacket* packet) {
         return;
     }
     
-    // Phase 5a: Render to FBO
+    // Phase 5a: Bind FBO for rendering
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_object_);
     glViewport(0, 0, window_width_, window_height_);
     
@@ -399,10 +412,70 @@ void OpenGLRenderer::RenderFrame(const RenderPacket* packet) {
     // Use shader program
     glUseProgram(shader_program_);
     
-    // Bind VAO and render quad
-    glBindVertexArray(vertex_array_object_);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (void*)0);
-    glBindVertexArray(0);
+    // Phase 5b: Batch render all sprites with their transforms
+    if (packet && packet->sprite_count > 0) {
+        // Get uniform locations
+        int transform_loc = glGetUniformLocation(shader_program_, "transform_matrix");
+        int color_loc = glGetUniformLocation(shader_program_, "sprite_color");
+        
+        // Render each sprite with its transform
+        for (uint32_t i = 0; i < packet->sprite_count && i < packet->transform_count; ++i) {
+            const TransformPacket& transform = packet->transforms[i];
+            const SpritePacket& sprite = packet->sprites[i];
+            
+            // Phase 5c: Calculate 2D TRS matrix
+            // Create transform matrix: T * R * S
+            float angle_rad = transform.rotation * 3.14159265f / 180.0f;
+            float cos_rot = ::cos(angle_rad);
+            float sin_rot = ::sin(angle_rad);
+            
+            // 2D TRS matrix (4x4 for compatibility)
+            float matrix[16] = {
+                // Scale and Rotation combined
+                transform.scale_x * cos_rot, -sin_rot, 0.0f, 0.0f,
+                sin_rot, transform.scale_y * cos_rot, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                // Translation
+                transform.position_x, transform.position_y, 0.0f, 1.0f
+            };
+            
+            // Set uniforms for this sprite
+            glUniformMatrix4fv(transform_loc, 1, GL_FALSE, matrix);
+            
+            // Decode color from RGBA packed format (0xRRGGBBAA)
+            float r = ((sprite.color >> 24) & 0xFF) / 255.0f;
+            float g = ((sprite.color >> 16) & 0xFF) / 255.0f;
+            float b = ((sprite.color >> 8) & 0xFF) / 255.0f;
+            float a = (sprite.color & 0xFF) / 255.0f;
+            glUniform4f(color_loc, r, g, b, a);
+            
+            // Bind VAO and render quad
+            glBindVertexArray(vertex_array_object_);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (void*)0);
+            
+            std::cout << "[MantleRenderer] Sprite " << i << ": pos=(" << transform.position_x 
+                      << "," << transform.position_y << ") rot=" << transform.rotation 
+                      << "° color=#" << std::hex << sprite.color << std::dec << std::endl;
+        }
+        glBindVertexArray(0);
+    } else {
+        // Fallback: render single green quad if no sprites provided (Phase 5a compatibility)
+        float default_matrix[16] = {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        };
+        int transform_loc = glGetUniformLocation(shader_program_, "transform_matrix");
+        int color_loc = glGetUniformLocation(shader_program_, "sprite_color");
+        
+        glUniformMatrix4fv(transform_loc, 1, GL_FALSE, default_matrix);
+        glUniform4f(color_loc, 0.0f, 0.5f, 0.0f, 1.0f);  // Phase 5a green
+        
+        glBindVertexArray(vertex_array_object_);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (void*)0);
+        glBindVertexArray(0);
+    }
     
     // Unbind framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -411,8 +484,7 @@ void OpenGLRenderer::RenderFrame(const RenderPacket* packet) {
     if (packet) {
         std::cout << "[MantleRenderer] Frame " << packet->frame_number 
                   << ": " << packet->transform_count << " transforms, "
-                  << packet->sprite_count << " sprites, "
-                  << packet->collider_count << " colliders" << std::endl;
+                  << packet->sprite_count << " sprites" << std::endl;
     }
     
     // Always dump the frame (for testing/visualization)
@@ -466,24 +538,43 @@ bool OpenGLRenderer::CreateGLContext() {
 bool OpenGLRenderer::CreateShaderProgram() {
     std::cout << "[MantleRenderer] Creating shader program..." << std::endl;
     
-    // Phase 5b: Compile shaders from source
-    // Simple vertex shader - passthrough positioning
+    // Phase 5b/5c: Compile shaders with transform support
+    // Vertex shader - apply 2D TRS transformation to quad vertices
     const char* vertex_source = R"glsl(
         #version 430 core
         layout(location = 0) in vec2 position;
         
+        // Per-instance transform (Phase 5c)
+        uniform mat4 transform_matrix;
+        uniform vec4 sprite_color;  // RGBA color for this sprite
+        
+        out VS_OUT {
+            vec4 vertex_color;
+        } vs_out;
+        
         void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
+            // Apply transform matrix to quad position
+            vec4 world_pos = transform_matrix * vec4(position, 0.0, 1.0);
+            gl_Position = world_pos;
+            
+            // Pass color to fragment shader
+            vs_out.vertex_color = sprite_color;
         }
     )glsl";
     
-    // Simple fragment shader - output green color (Phase 5h signature)
+    // Fragment shader - output sprite color (Phase 5b signature)
     const char* fragment_source = R"glsl(
         #version 430 core
+        
+        in VS_OUT {
+            vec4 vertex_color;
+        } fs_in;
+        
         out vec4 FragColor;
         
         void main() {
-            FragColor = vec4(0.0, 0.5, 0.0, 1.0);
+            // Use per-sprite color (from SpritePacket)
+            FragColor = fs_in.vertex_color;
         }
     )glsl";
     

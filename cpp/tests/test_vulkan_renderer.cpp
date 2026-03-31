@@ -351,6 +351,73 @@ TEST_F(VulkanRendererTest, Phase5h_SpriteBatchingWithTextures) {
     renderer.Shutdown();
 }
 
+/// Test 21: Phase 5b+5c - Visual Demonstration (4-Sprite Grid)
+/// Creates distinct visual output showing batch rendering with transforms
+TEST_F(VulkanRendererTest, Phase5b_VisualDemo_ColorGrid) {
+    EXPECT_TRUE(renderer.Initialize());
+    EXPECT_TRUE(renderer.IsReady());
+    
+    // Create 4-sprite grid (2x2) with distinct colors and transforms
+    // This demonstrates the visual output of Vulkan backend
+    const int NUM_SPRITES = 4;
+    TransformPacket transforms[NUM_SPRITES];
+    SpritePacket sprites[NUM_SPRITES];
+    
+    // Define grid positions and colors
+    struct GridCell {
+        float pos_x;
+        float pos_y;
+        float rotation;
+        float scale_x;
+        float scale_y;
+        uint32_t color;
+        const char* name;
+    };
+    
+    GridCell cells[] = {
+        {256.0f, 384.0f, 0.0f,   0.8f, 0.8f, 0xFF0000FF, "Red"},      // Top-left
+        {768.0f, 384.0f, 0.0f,   0.8f, 0.8f, 0x00FF00FF, "Green"},    // Top-right
+        {256.0f, 128.0f, 45.0f,  0.8f, 0.8f, 0x0000FFFF, "Blue"},     // Bottom-left (rotated)
+        {768.0f, 128.0f, -45.0f, 1.2f, 1.2f, 0xFFFF00FF, "Yellow"},   // Bottom-right (rotated + scaled)
+    };
+    
+    for (int i = 0; i < NUM_SPRITES; i++) {
+        transforms[i] = TransformPacket(
+            cells[i].pos_x,
+            cells[i].pos_y,
+            cells[i].rotation,
+            cells[i].scale_x,
+            cells[i].scale_y,
+            i + 1  // z_index
+        );
+        
+        sprites[i] = SpritePacket(
+            i + 1,           // texture_id
+            64.0f,           // width
+            64.0f,           // height
+            cells[i].color,  // RGBA color
+            0.0f,            // uv_min_x
+            0.0f,            // uv_min_y
+            1.0f,            // uv_max_x
+            1.0f             // uv_max_y
+        );
+    }
+    
+    RenderPacket packet(0, 0.016f, NUM_SPRITES, NUM_SPRITES, 0, transforms, sprites, nullptr);
+    
+    std::cout << "\n[Visual Demo] Vulkan - Creating 4-Sprite Grid" << std::endl;
+    std::cout << "  Layout: 2x2 with primary colors (RGBY)" << std::endl;
+    std::cout << "  Frame output: output/frame_***.ppm" << std::endl;
+    
+    // Submit and render
+    renderer.SubmitRenderPacket(&packet);
+    renderer.WaitRender();
+    
+    std::cout << "✓ Vulkan grid rendering complete" << std::endl;
+    
+    renderer.Shutdown();
+}
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

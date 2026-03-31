@@ -1,7 +1,7 @@
 #ifndef MANTLE_RENDERER_H
 #define MANTLE_RENDERER_H
 
-#include "render_packet.h"
+#include "../render_packet.h"
 #include <cstdint>
 #include <memory>
 #include <vector>
