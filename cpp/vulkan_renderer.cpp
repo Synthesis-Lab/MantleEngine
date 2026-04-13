@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+#include <filesystem>
+#include <system_error>
 
 // Phase 5+: Include Vulkan headers for actual implementation
 #include <vulkan/vulkan.h>
@@ -15,13 +17,13 @@
 // 
 // Architecture Overview:
 // 
-//   Game Thread (Rust)              Render Thread (C++)
+//   Game Thread (C++ Runtime)       Render Thread (C++)
 //   ───────────────────              ──────────────────
 //   [Scene Tree]                     [VulkanRenderer]
 //       ↓                                   ↑
-//   [FFI RenderPacket] ────────────────────┤
+//   [RenderPacket] ────────────────────────┤
 //       ↓ (submit)
-//   [C ABI] ────────────────→ [SubmitRenderPacket()]
+//   [Runtime API] ───────────→ [SubmitRenderPacket()]
 //       ↓ (wait)
 //       ←──────────────────── [WaitRender()]
 //
@@ -31,7 +33,7 @@
 //   Phase 5+: Rendering - swapchain, render passes, pipelines, frame recording
 //
 // Key Structures:
-//   - RenderPacket: Frame-scoped data from Rust
+//   - RenderPacket: Frame-scoped runtime data
 //   - VulkanRenderer: Manages Vulkan lifetime and rendering
 //   - Command buffers: Recorded per frame, executed by GPU
 //
@@ -1371,18 +1373,20 @@ void VulkanRenderer::DumpCurrentFrame(uint32_t image_index, const RenderPacket* 
     
     // Initialize pixel buffer if not already done
     if (pixel_buffer_.empty()) {
-        pixel_buffer_.resize(width * height, 0xFF000000); // Black background (RGBA)
+        const auto pixel_count = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+        pixel_buffer_.resize(pixel_count, 0xFF000000U); // Black background (RGBA)
     }
-    
+
     // Phase 5b+5c: Rasterize sprites to pixel buffer
     // Clear to black
-    for (uint32_t i = 0; i < width * height; ++i) {
-        pixel_buffer_[i] = 0xFF000000; // RGBA: Black (A=255)
+    const auto pixel_count = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+    for (std::size_t i = 0; i < pixel_count; ++i) {
+        pixel_buffer_[i] = 0xFF000000U; // RGBA: Black (A=255)
     }
-    
+
     // Now fill with green background (Phase 5h signature)
-    uint32_t green = 0xFF007F00; // RGBA: (0, 127, 0, 255)
-    for (uint32_t i = 0; i < width * height; ++i) {
+    constexpr uint32_t green = 0xFF007F00U; // RGBA: (0, 127, 0, 255)
+    for (std::size_t i = 0; i < pixel_count; ++i) {
         pixel_buffer_[i] = green;
     }
     
@@ -1403,13 +1407,13 @@ void VulkanRenderer::DumpCurrentFrame(uint32_t image_index, const RenderPacket* 
             
             // Simple rectangle rasterization (no rotation for simplicity)
             // Position in screen space: pixel values
-            int center_x = (int)transform.position_x;
-            int center_y = (int)transform.position_y;
-            
+            const int center_x = static_cast<int>(transform.position_x);
+            const int center_y = static_cast<int>(transform.position_y);
+
             // Apply scale to half-width/height
-            int half_w = (int)(sprite.width * transform.scale_x / 2.0f);
-            int half_h = (int)(sprite.height * transform.scale_y / 2.0f);
-            
+            const int half_w = static_cast<int>((sprite.width * transform.scale_x) / 2.0f);
+            const int half_h = static_cast<int>((sprite.height * transform.scale_y) / 2.0f);
+
             // Draw filled rectangle
             int x_min = center_x - half_w;
             int x_max = center_x + half_w;
@@ -1448,9 +1452,10 @@ void VulkanRenderer::DumpCurrentFrame(uint32_t image_index, const RenderPacket* 
 }
 
 bool VulkanRenderer::SaveFrameToPPM(const char* filename, uint32_t width, uint32_t height) {
-    // Ensure output directory exists
-    system("mkdir -p output");
-    
+    // Ensure output directory exists without shelling out.
+    std::error_code ec;
+    std::filesystem::create_directories("output", ec);
+
     // Open file for binary writing
     FILE* file = fopen(filename, "wb");
     if (!file) {
@@ -1464,9 +1469,10 @@ bool VulkanRenderer::SaveFrameToPPM(const char* filename, uint32_t width, uint32
     
     // Write pixel data (RGB triplets)
     // Convert from RGBA to RGB by skipping the alpha channel
-    for (uint32_t i = 0; i < width * height; ++i) {
+    const auto pixel_count = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+    for (std::size_t i = 0; i < pixel_count; ++i) {
         uint32_t rgba = pixel_buffer_[i];
-        
+
         // Extract RGBA components (assuming little-endian: 0xAABBGGRR)
         uint8_t r = (rgba >> 0) & 0xFF;
         uint8_t g = (rgba >> 8) & 0xFF;
@@ -1923,8 +1929,9 @@ bool VulkanRenderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
 }
 
 void VulkanRenderer::CopyBuffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
-    // Phase 5g - Copy data between GPU buffers\n    // Uses command buffer to record and execute copy operation
-    
+    // Phase 5g - Copy data between GPU buffers
+    // Uses command buffer to record and execute copy operation
+
     // Allocate temporary command buffer for transfer
     VkCommandBufferAllocateInfo alloc_info = {};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

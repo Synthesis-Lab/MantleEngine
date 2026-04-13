@@ -3,7 +3,7 @@
 ## Architecture
 
 ```
-Rust Side (MantleCore)                    C++ Side (VulkanRenderer)
+C++ Core Runtime                          C++ Side (VulkanRenderer)
 ───────────────────────                   ──────────────────────────
 [Game Systems]
 ├─ RenderSystem
@@ -12,7 +12,7 @@ Rust Side (MantleCore)                    C++ Side (VulkanRenderer)
 └─ CollisionSystem
         ↓
   [RenderPacket struct]
- (zero-copy FFI)
+ (frame data packet)
         ↓
   [C ABI submit]
         ↓                          →  [VulkanRenderer]
@@ -52,7 +52,7 @@ Rust Side (MantleCore)                    C++ Side (VulkanRenderer)
 ### Phase 5d: Output & Testing
 - [ ] Offscreen rendering (PPM/PNG output)
 - [ ] Unit tests for each component
-- [ ] Integration with Rust tests
+- [ ] Integration with C++ runtime tests
 
 ## Current Status
 
@@ -65,8 +65,8 @@ Rust Side (MantleCore)                    C++ Side (VulkanRenderer)
 **Phase 5+ Starting Point:**
 - 📍 `cpp/vulkan_renderer.h` - class definition ready
 - 📍 `cpp/vulkan_renderer.cpp` - skeleton with Phase 5 guidance
-- 📍 RenderPacket structures - FFI ready
-- 📍 Rust RenderSystem - fully functional
+- 📍 RenderPacket structures - runtime ready
+- 📍 C++ runtime integration - in progress
 
 ## Next Steps
 

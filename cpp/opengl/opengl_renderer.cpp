@@ -2,7 +2,9 @@
 #include <iostream>
 #include <cstdarg>
 #include <cmath>
-#include <cmath>
+#include <filesystem>
+#include <numbers>
+#include <system_error>
 
 // GLFW3 headers (conditional based on USE_GLFW3)
 #ifdef USE_GLFW3
@@ -112,7 +114,7 @@ struct GLFWwindow {
 #define glCreateShader(type) 1
 #endif
 #ifndef glShaderSource
-#define glShaderSource(...) ((void)0)
+#define glShaderSource(shader, count, string, length) ((void)(shader), (void)(count), (void)(string), (void)(length))
 #endif
 #ifndef glCompileShader
 #define glCompileShader(shader) ((void)0)
@@ -121,7 +123,7 @@ struct GLFWwindow {
 inline void glGetShaderiv_stub(unsigned int shader, unsigned int pname, int *params) {
     if (params) {
         if (pname == GL_COMPILE_STATUS || pname == GL_INFO_LOG_LENGTH) {
-            *params = (pname == GL_COMPILE_STATUS) ? 1 : 1;  // Success
+            *params = 1;  // Success in stub mode
         }
     }
 }
@@ -144,7 +146,7 @@ inline void glGetShaderInfoLog_stub(unsigned int shader, int maxLength, int *len
 inline void glGetProgramiv_stub(unsigned int program, unsigned int pname, int *params) {
     if (params) {
         if (pname == GL_LINK_STATUS || pname == GL_INFO_LOG_LENGTH) {
-            *params = (pname == GL_LINK_STATUS) ? 1 : 1;  // Success
+            *params = 1;  // Success in stub mode
         }
     }
 }
@@ -179,8 +181,13 @@ inline void glGetProgramInfoLog_stub(unsigned int program, int maxLength, int *l
 #define glfwWindowHint(hint, value) ((void)0)
 #endif
 #ifndef glfwCreateWindow
-// Return a non-null dummy window pointer when GLFW3 not available (cast int to pointer)
-#define glfwCreateWindow(w, h, title, mon, share) ((GLFWwindow*)(0x1))
+#if !defined(USE_GLFW3) && !defined(glfwCreateWindow)
+inline GLFWwindow* glfwCreateWindow_stub(int /*w*/, int /*h*/, const char* /*title*/, void* /*mon*/, void* /*share*/) {
+    static GLFWwindow dummy_window{};
+    return &dummy_window;
+}
+#define glfwCreateWindow(w, h, title, mon, share) glfwCreateWindow_stub((w), (h), (title), (mon), (share))
+#endif
 #endif
 #ifndef glfwDestroyWindow
 #define glfwDestroyWindow(w) ((void)0)
@@ -200,10 +207,10 @@ inline void glGetProgramInfoLog_stub(unsigned int program, int maxLength, int *l
 #define glGetUniformLocation(program, name) 0
 #endif
 #ifndef glUniformMatrix4fv
-#define glUniformMatrix4fv(location, count, transpose, value) ((void)0)
+#define glUniformMatrix4fv(location, count, transpose, value) ((void)(location), (void)(count), (void)(transpose), (void)(value))
 #endif
 #ifndef glUniform4f
-#define glUniform4f(location, x, y, z, w) ((void)0)
+#define glUniform4f(location, x, y, z, w) ((void)(location), (void)(x), (void)(y), (void)(z), (void)(w))
 #endif
 
 // ============================================================================
@@ -425,10 +432,11 @@ void OpenGLRenderer::RenderFrame(const RenderPacket* packet) {
             
             // Phase 5c: Calculate 2D TRS matrix
             // Create transform matrix: T * R * S
-            float angle_rad = transform.rotation * 3.14159265f / 180.0f;
-            float cos_rot = ::cos(angle_rad);
-            float sin_rot = ::sin(angle_rad);
-            
+            constexpr float kDegToRad = std::numbers::pi_v<float> / 180.0f;
+            const float angle_rad = transform.rotation * kDegToRad;
+            const float cos_rot = std::cos(angle_rad);
+            const float sin_rot = std::sin(angle_rad);
+
             // 2D TRS matrix (4x4 for compatibility)
             float matrix[16] = {
                 // Scale and Rotation combined
@@ -451,8 +459,8 @@ void OpenGLRenderer::RenderFrame(const RenderPacket* packet) {
             
             // Bind VAO and render quad
             glBindVertexArray(vertex_array_object_);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (void*)0);
-            
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
             std::cout << "[MantleRenderer] Sprite " << i << ": pos=(" << transform.position_x 
                       << "," << transform.position_y << ") rot=" << transform.rotation 
                       << "° color=#" << std::hex << sprite.color << std::dec << std::endl;
@@ -473,7 +481,7 @@ void OpenGLRenderer::RenderFrame(const RenderPacket* packet) {
         glUniform4f(color_loc, 0.0f, 0.5f, 0.0f, 1.0f);  // Phase 5a green
         
         glBindVertexArray(vertex_array_object_);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (void*)0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
         glBindVertexArray(0);
     }
     
@@ -663,13 +671,15 @@ bool OpenGLRenderer::CreateQuadGeometry() {
     // Upload vertex data
     glBindBuffer(GL_ARRAY_BUFFER, quad_vertex_buffer_);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertices), quad_vertices, GL_STATIC_DRAW);
-    
+    (void)quad_vertices;  // Keep variables marked as used in stub/no-op GL builds.
+
     // Upload index data
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad_index_buffer_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices, GL_STATIC_DRAW);
-    
+    (void)quad_indices;
+
     // Define vertex attributes (position only for now)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
     
     glBindVertexArray(0);
@@ -739,7 +749,8 @@ bool OpenGLRenderer::CreatePlaceholderTexture() {
     
     uint8_t white_pixel[] = { 255, 255, 255, 255 };  // RGBA white
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, white_pixel);
-    
+    (void)white_pixel;
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
@@ -751,7 +762,8 @@ void OpenGLRenderer::RasterizeSprites(const RenderPacket* packet) {
     // CPU-side software rasterization for headless/stub GPU mode
     // Initialize pixel buffer with green background (Phase 5h signature)
     if (pixel_buffer_.empty()) {
-        pixel_buffer_.resize(window_width_ * window_height_ * 4, 0);  // RGBA
+        const auto pixel_count = static_cast<std::size_t>(window_width_) * static_cast<std::size_t>(window_height_) * 4U;
+        pixel_buffer_.resize(pixel_count, 0);  // RGBA
     }
     
     // Fill background: green (0, 127, 0, 255)
@@ -776,13 +788,12 @@ void OpenGLRenderer::RasterizeSprites(const RenderPacket* packet) {
             
             // Simple rectangle rasterization (no rotation/scale for simplicity)
             // Position in screen space: normalize from -1..1 to 0..1024, 0..768
-            int center_x = (int)((transform.position_x + 1.0f) / 2.0f * window_width_);
-            int center_y = (int)((transform.position_y + 1.0f) / 2.0f * window_height_);
-            
-            // Apply scale to half-width/height
-            int half_w = (int)(sprite.width * transform.scale_x / 2.0f);
-            int half_h = (int)(sprite.height * transform.scale_y / 2.0f);
-            
+            const int center_x = static_cast<int>(((transform.position_x + 1.0f) / 2.0f) * static_cast<float>(window_width_));
+            const int center_y = static_cast<int>(((transform.position_y + 1.0f) / 2.0f) * static_cast<float>(window_height_));
+
+            const int half_w = static_cast<int>((sprite.width * transform.scale_x) / 2.0f);
+            const int half_h = static_cast<int>((sprite.height * transform.scale_y) / 2.0f);
+
             // Draw filled rectangle
             int x_min = center_x - half_w;
             int x_max = center_x + half_w;
@@ -818,7 +829,8 @@ void OpenGLRenderer::DumpCurrentFrame() {
     
     // Phase 5d: Read framebuffer and dump to PPM
     if (pixel_buffer_.empty()) {
-        pixel_buffer_.resize(window_width_ * window_height_ * 4, 0);  // RGBA
+        const auto pixel_count = static_cast<std::size_t>(window_width_) * static_cast<std::size_t>(window_height_) * 4U;
+        pixel_buffer_.resize(pixel_count, 0);  // RGBA
     }
     
     // Bind framebuffer and read pixels
@@ -839,9 +851,10 @@ void OpenGLRenderer::DumpCurrentFrame() {
 }
 
 bool OpenGLRenderer::SaveFrameToPPM(const char* filename, uint32_t width, uint32_t height) {
-    // Ensure output directory exists
-    system("mkdir -p output");
-    
+    // Ensure output directory exists without shelling out.
+    std::error_code ec;
+    std::filesystem::create_directories("output", ec);
+
     // Open file for binary writing
     FILE* file = fopen(filename, "wb");
     if (!file) {

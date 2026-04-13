@@ -37,11 +37,36 @@ else()
 endif()
 
 # Core renderer library
-add_library(mantle_renderer
-    vulkan_renderer.cpp
-    opengl/opengl_renderer.cpp
-    renderer.cpp
-    vulkan/vulkan_stub.cpp
+add_library(mantle_renderer)
+
+target_sources(mantle_renderer
+    PRIVATE
+        core/engine.cpp
+        runtime/runtime.cpp
+        modules/input/input_system.cpp
+        modules/sound/sound_system.cpp
+        modules/physics/physics_world.cpp
+        vulkan_renderer.cpp
+        opengl/opengl_renderer.cpp
+        renderer.cpp
+        vulkan/vulkan_stub.cpp
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+        FILES
+            include/renderer.h
+            include/opengl_renderer.h
+            include/runtime.h
+            include/mantle_engine.h
+            render_packet.h
+            vulkan_renderer.h
+            core/engine.h
+            core/module.h
+            core/time_step.h
+            runtime/runtime.h
+            modules/input/input_system.h
+            modules/sound/sound_system.h
+            modules/physics/physics_world.h
 )
 
 target_include_directories(mantle_renderer
@@ -71,20 +96,40 @@ endif()
 
 # Compiler flags
 if(MSVC)
-    target_compile_options(mantle_renderer PRIVATE /W4)
+    target_compile_options(mantle_renderer PRIVATE /W4 /permissive-)
 else()
-    target_compile_options(mantle_renderer PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(mantle_renderer PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wshadow
+        -Wconversion
+        -Wsign-conversion
+    )
 endif()
 
-# Export library for linking with Rust
+if(NOT MSVC)
+    # Third-party-like stub and legacy backend files are intentionally permissive.
+    set_source_files_properties(vulkan/vulkan_stub.cpp PROPERTIES COMPILE_OPTIONS "-Wno-unused-parameter")
+    set_source_files_properties(vulkan_renderer.cpp PROPERTIES COMPILE_OPTIONS "-Wno-unused-parameter;-Wno-conversion;-Wno-sign-conversion")
+    set_source_files_properties(opengl/opengl_renderer.cpp PROPERTIES COMPILE_OPTIONS "-Wno-unused-parameter;-Wno-unused-variable;-Wno-conversion;-Wno-sign-conversion;-Wno-float-conversion")
+endif()
+
 set_target_properties(mantle_renderer PROPERTIES
-    PUBLIC_HEADER "include/renderer.h;include/vulkan_renderer.h;include/opengl_renderer.h;include/render_packet.h"
     VERSION ${PROJECT_VERSION}
     SOVERSION 0
 )
 
+if(MANTLE_BUILD_EXAMPLES)
+    add_executable(mantle_demo
+        examples/main.cpp
+    )
+
+    target_link_libraries(mantle_demo PRIVATE mantle_renderer)
+endif()
+
 # Installation (optional, for development)
 install(TARGETS mantle_renderer
     LIBRARY DESTINATION lib
-    PUBLIC_HEADER DESTINATION include/mantle
+    FILE_SET HEADERS DESTINATION include/mantle
 )

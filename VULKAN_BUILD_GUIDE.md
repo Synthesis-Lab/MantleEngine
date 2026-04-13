@@ -17,7 +17,7 @@ sudo apt-get install cmake
 
 ### Step 1: Create Build Directory
 ```bash
-cd /home/btamboga/Belgeler/Geliştirme/GitHub\ Repositories/MantleEngine
+cd MantleEngine
 mkdir -p build && cd build
 ```
 
@@ -57,10 +57,9 @@ ctest -V --output-on-failure
 
 ## Verify Integration
 
-### Rust Tests (All systems)
+### C++ Tests (All systems)
 ```bash
-cargo test --lib
-# Expected: 261 tests passed (includes Phase 5+ integration tests)
+ctest --test-dir build --output-on-failure
 ```
 
 ### Check Vulkan Setup
@@ -159,25 +158,24 @@ ctest --output-on-failure
 cpp/
 ├── vulkan_renderer.h       (Phase 4 ✅ → Phase 5 ✅)
 ├── vulkan_renderer.cpp     (Phase 5✅ core implementation)
-├── render_packet.h         (FFI structures ✅)
+├── render_packet.h         (runtime data structures ✅)
 ├── CMakeLists.txt          (Vulkan linking ✅)
 └── tests/
     ├── test_vulkan_renderer.cpp  (10 unit tests ✅)
     └── CMakeLists.txt            (GTest framework ✅)
 
-src/
-├── systems/
-│   ├── render_system.rs
-│   ├── animation_system.rs
-│   └── collision_system.rs
-└── phase5_plus_tests.rs    (Rust integration tests ✅)
+cpp/
+└── modules/
+    ├── input/
+    ├── sound/
+    └── physics/
 ```
 
 ## Metrics
 
 - **Phase 5 Status**: ✅ Complete (Scaffold)
 - **C++ Tests**: ✅ 10/10 passing
-- **Rust Tests**: ✅ 261/261 passing
-- **Total Test Coverage**: **271 tests**
+- **Core Runtime Tests**: In progress (C++23 migration)
+- **Total Test Coverage**: Moving to C++ test suite
 - **Lines of C++ Code**: 400+ (Phase 5 implementation)
 - **Vulkan API Target**: 1.2+

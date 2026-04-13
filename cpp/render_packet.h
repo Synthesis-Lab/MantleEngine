@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <cstring>
 
-/// TransformPacket - Byte-perfect mirror of Rust repr(C) struct
-/// Size: 28 bytes (field layout must match Rust exactly)
+/// TransformPacket - ABI-stable transform payload
+/// Size: 28 bytes
 struct TransformPacket {
     float position_x;      // +0  bytes
     float position_y;      // +4  bytes
@@ -24,8 +24,8 @@ struct TransformPacket {
 
 static_assert(sizeof(TransformPacket) == 28, "TransformPacket must be 28 bytes");
 
-/// SpritePacket - Byte-perfect mirror of Rust repr(C) struct
-/// Size: 32 bytes (matches Rust exactly)
+/// SpritePacket - ABI-stable sprite payload
+/// Size: 32 bytes
 struct SpritePacket {
     uint32_t texture_id;       // +0  bytes
     float width;               // +4  bytes
@@ -48,8 +48,8 @@ struct SpritePacket {
 
 static_assert(sizeof(SpritePacket) == 32, "SpritePacket must be 32 bytes");
 
-/// ColliderPacket - Byte-perfect mirror of Rust repr(C) struct
-/// Size: 24 bytes (matches Rust exactly)
+/// ColliderPacket - ABI-stable collider payload
+/// Size: 24 bytes
 struct ColliderPacket {
     uint32_t shape_type;       // +0  bytes (0 = AABB, 1 = Circle)
     float x;                   // +4  bytes (position)
