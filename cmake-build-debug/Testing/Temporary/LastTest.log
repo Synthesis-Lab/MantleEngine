@@ -1,0 +1,732 @@
+Start testing: Apr 14 00:31 +03
+----------------------------------------------------------
+1/3 Testing: VulkanRendererTests
+1/3 Test: VulkanRendererTests
+Command: "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests/test_vulkan_renderer"
+Directory: /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests
+"VulkanRendererTests" start time: Apr 14 00:31 +03
+Output:
+----------------------------------------------------------
+[==========] Running 21 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 21 tests from VulkanRendererTest
+[ RUN      ] VulkanRendererTest.CreateInstance
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.CreateInstance (0 ms)
+[ RUN      ] VulkanRendererTest.DoubleInitialize
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer ERROR] Renderer already initialized
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.DoubleInitialize (0 ms)
+[ RUN      ] VulkanRendererTest.ShutdownWithoutInit
+[       OK ] VulkanRendererTest.ShutdownWithoutInit (0 ms)
+[ RUN      ] VulkanRendererTest.DoubleShutdown
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.DoubleShutdown (0 ms)
+[ RUN      ] VulkanRendererTest.ErrorHandling
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer ERROR] Renderer already initialized
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.ErrorHandling (0 ms)
+[ RUN      ] VulkanRendererTest.SubmitBeforeInit
+[MantleRenderer ERROR] Renderer not ready or packet is null
+[       OK ] VulkanRendererTest.SubmitBeforeInit (0 ms)
+[ RUN      ] VulkanRendererTest.NullPacketSubmit
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer ERROR] Renderer not ready or packet is null
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.NullPacketSubmit (0 ms)
+[ RUN      ] VulkanRendererTest.UploadBuffer
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Uploaded buffer 12 bytes -> ID 1
+  [TODO Phase 5+] Implement actual GPU memory upload
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.UploadBuffer (0 ms)
+[ RUN      ] VulkanRendererTest.InvalidBufferUpload
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer ERROR] Invalid buffer upload parameters
+[MantleRenderer ERROR] Invalid buffer upload parameters
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.InvalidBufferUpload (0 ms)
+[ RUN      ] VulkanRendererTest.WaitRenderBeforeInit
+[MantleRenderer ERROR] Renderer not ready
+[       OK ] VulkanRendererTest.WaitRenderBeforeInit (0 ms)
+[ RUN      ] VulkanRendererTest.CreateSurface
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.CreateSurface (2 ms)
+[ RUN      ] VulkanRendererTest.CreateSwapchain
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.CreateSwapchain (0 ms)
+[ RUN      ] VulkanRendererTest.CreateImageViews
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.CreateImageViews (0 ms)
+[ RUN      ] VulkanRendererTest.CreateRenderPass
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.CreateRenderPass (0 ms)
+[ RUN      ] VulkanRendererTest.CreateFramebuffers
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.CreateFramebuffers (0 ms)
+[ RUN      ] VulkanRendererTest.MultipleSwapchainTest
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.MultipleSwapchainTest (0 ms)
+[ RUN      ] VulkanRendererTest.PhaseIntegrationTest
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Frame 0: 0 transforms, 0 sprites, 0 colliders (no batch)
+[MantleRenderer] Frame dumped: output/frame_0001.ppm
+[MantleRenderer] Rendering empty frame
+[MantleRenderer] Frame dumped: output/frame_0002.ppm
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.PhaseIntegrationTest (85 ms)
+[ RUN      ] VulkanRendererTest.Phase5h_SingleSpriteRender
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Frame 0: Batch rendering 1 sprites
+[MantleRenderer] Sprite 0: pos=(100,100) rot=0° scale=(1,1) color=0xffffffff
+[MantleRenderer] Frame dumped: output/frame_0001.ppm
+[MantleRenderer] Rendering empty frame
+[MantleRenderer] Frame dumped: output/frame_0002.ppm
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.Phase5h_SingleSpriteRender (75 ms)
+[ RUN      ] VulkanRendererTest.Phase5h_MultipleSpritesRender
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Frame 0: Batch rendering 5 sprites
+[MantleRenderer] Sprite 0: pos=(200,600) rot=0° scale=(1,1) color=0xff0000ff
+[MantleRenderer] Sprite 1: pos=(800,600) rot=45° scale=(1.2,1.2) color=0xff00ff
+[MantleRenderer] Sprite 2: pos=(512,384) rot=90° scale=(1.5,1.5) color=0xffff
+[MantleRenderer] Sprite 3: pos=(200,200) rot=180° scale=(0.8,0.8) color=0xffff00ff
+[MantleRenderer] Sprite 4: pos=(800,200) rot=270° scale=(1.1,0.9) color=0xffffff
+[MantleRenderer] Frame dumped: output/frame_0001.ppm
+[MantleRenderer] Rendering empty frame
+[MantleRenderer] Frame dumped: output/frame_0002.ppm
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.Phase5h_MultipleSpritesRender (76 ms)
+[ RUN      ] VulkanRendererTest.Phase5h_SpriteBatchingWithTextures
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Frame 0: Batch rendering 8 sprites
+[MantleRenderer] Sprite 0: pos=(300,300) rot=0° scale=(0.8,1) color=0xff0000ff
+[MantleRenderer] Sprite 1: pos=(450,300) rot=45° scale=(0.9,1) color=0xff00ff
+[MantleRenderer] Sprite 2: pos=(600,300) rot=90° scale=(1,1) color=0xffff
+[MantleRenderer] Sprite 3: pos=(750,300) rot=135° scale=(1.1,1) color=0xffff00ff
+[MantleRenderer] Sprite 4: pos=(300,500) rot=180° scale=(1.2,1) color=0xff00ffff
+[MantleRenderer] Sprite 5: pos=(450,500) rot=225° scale=(1.3,1) color=0xffffff
+[MantleRenderer] Sprite 6: pos=(600,500) rot=270° scale=(1.4,1) color=0xffffffff
+[MantleRenderer] Sprite 7: pos=(750,500) rot=315° scale=(1.5,1) color=0x808080ff
+[MantleRenderer] Frame dumped: output/frame_0001.ppm
+[MantleRenderer] Rendering empty frame
+[MantleRenderer] Frame dumped: output/frame_0002.ppm
+[MantleRenderer] Frame 0: Batch rendering 8 sprites
+[MantleRenderer] Sprite 0: pos=(300,300) rot=0° scale=(0.8,1) color=0xff0000ff
+[MantleRenderer] Sprite 1: pos=(450,300) rot=45° scale=(0.9,1) color=0xff00ff
+[MantleRenderer] Sprite 2: pos=(600,300) rot=90° scale=(1,1) color=0xffff
+[MantleRenderer] Sprite 3: pos=(750,300) rot=135° scale=(1.1,1) color=0xffff00ff
+[MantleRenderer] Sprite 4: pos=(300,500) rot=180° scale=(1.2,1) color=0xff00ffff
+[MantleRenderer] Sprite 5: pos=(450,500) rot=225° scale=(1.3,1) color=0xffffff
+[MantleRenderer] Sprite 6: pos=(600,500) rot=270° scale=(1.4,1) color=0xffffffff
+[MantleRenderer] Sprite 7: pos=(750,500) rot=315° scale=(1.5,1) color=0x808080ff
+[MantleRenderer] Frame dumped: output/frame_0003.ppm
+[MantleRenderer] Rendering empty frame
+[MantleRenderer] Frame dumped: output/frame_0004.ppm
+[MantleRenderer] Frame 0: Batch rendering 8 sprites
+[MantleRenderer] Sprite 0: pos=(300,300) rot=0° scale=(0.8,1) color=0xff0000ff
+[MantleRenderer] Sprite 1: pos=(450,300) rot=45° scale=(0.9,1) color=0xff00ff
+[MantleRenderer] Sprite 2: pos=(600,300) rot=90° scale=(1,1) color=0xffff
+[MantleRenderer] Sprite 3: pos=(750,300) rot=135° scale=(1.1,1) color=0xffff00ff
+[MantleRenderer] Sprite 4: pos=(300,500) rot=180° scale=(1.2,1) color=0xff00ffff
+[MantleRenderer] Sprite 5: pos=(450,500) rot=225° scale=(1.3,1) color=0xffffff
+[MantleRenderer] Sprite 6: pos=(600,500) rot=270° scale=(1.4,1) color=0xffffffff
+[MantleRenderer] Sprite 7: pos=(750,500) rot=315° scale=(1.5,1) color=0x808080ff
+[MantleRenderer] Frame dumped: output/frame_0005.ppm
+[MantleRenderer] Rendering empty frame
+[MantleRenderer] Frame dumped: output/frame_0006.ppm
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.Phase5h_SpriteBatchingWithTextures (204 ms)
+[ RUN      ] VulkanRendererTest.Phase5b_VisualDemo_ColorGrid
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+
+[Visual Demo] Vulkan - Creating 4-Sprite Grid
+  Layout: 2x2 with primary colors (RGBY)
+  Frame output: output/frame_***.ppm
+[MantleRenderer] Frame 0: Batch rendering 4 sprites
+[MantleRenderer] Sprite 0: pos=(256,384) rot=0° scale=(0.8,0.8) color=0xff0000ff
+[MantleRenderer] Sprite 1: pos=(768,384) rot=0° scale=(0.8,0.8) color=0xff00ff
+[MantleRenderer] Sprite 2: pos=(256,128) rot=45° scale=(0.8,0.8) color=0xffff
+[MantleRenderer] Sprite 3: pos=(768,128) rot=-45° scale=(1.2,1.2) color=0xffff00ff
+[MantleRenderer] Frame dumped: output/frame_0001.ppm
+[MantleRenderer] Rendering empty frame
+[MantleRenderer] Frame dumped: output/frame_0002.ppm
+✓ Vulkan grid rendering complete
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] VulkanRendererTest.Phase5b_VisualDemo_ColorGrid (71 ms)
+[----------] 21 tests from VulkanRendererTest (516 ms total)
+
+[----------] Global test environment tear-down
+[==========] 21 tests from 1 test suite ran. (517 ms total)
+[  PASSED  ] 21 tests.
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Passed.
+"VulkanRendererTests" end time: Apr 14 00:31 +03
+"VulkanRendererTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/3 Testing: RuntimeTests
+2/3 Test: RuntimeTests
+Command: "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests/test_runtime"
+Directory: /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests
+"RuntimeTests" start time: Apr 14 00:31 +03
+Output:
+----------------------------------------------------------
+Running main() from /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/src/gtest_main.cc
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from RuntimeTest
+[ RUN      ] RuntimeTest.InitializesAndShutsDown
+[MantleRenderer] Auto-detecting best graphics backend...
+[MantleRenderer] Creating Vulkan renderer
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] RuntimeTest.InitializesAndShutsDown (0 ms)
+[ RUN      ] RuntimeTest.PhysicsStepAdvancesBodies
+[MantleRenderer] Auto-detecting best graphics backend...
+[MantleRenderer] Creating Vulkan renderer
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[       OK ] RuntimeTest.PhysicsStepAdvancesBodies (0 ms)
+[----------] 2 tests from RuntimeTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 2 tests.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RuntimeTests" end time: Apr 14 00:31 +03
+"RuntimeTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/3 Testing: AllEnginesIntegrationTests
+3/3 Test: AllEnginesIntegrationTests
+Command: "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests/test_all_engines_integration"
+Directory: /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests
+"AllEnginesIntegrationTests" start time: Apr 14 00:31 +03
+Output:
+----------------------------------------------------------
+Running main() from /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/src/gtest_main.cc
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 10 tests from AllEnginesIntegrationTest
+[ RUN      ] AllEnginesIntegrationTest.AllEnginesInitialize
+[       OK ] AllEnginesIntegrationTest.AllEnginesInitialize (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.InputSystemFunctionality
+[       OK ] AllEnginesIntegrationTest.InputSystemFunctionality (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.PhysicsSystemFunctionality
+[       OK ] AllEnginesIntegrationTest.PhysicsSystemFunctionality (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.SoundSystemFunctionality
+[       OK ] AllEnginesIntegrationTest.SoundSystemFunctionality (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.RenderEngineFactory
+[MantleRenderer] Creating Vulkan renderer
+[MantleRenderer] Creating OpenGL renderer
+[MantleRenderer] OpenGL renderer constructed
+[MantleRenderer] Auto-detecting best graphics backend...
+[MantleRenderer] Creating Vulkan renderer
+[MantleRenderer] Vulkan instance created (API 1.2)
+[MantleRenderer] Selected GPU: Stub Vulkan Device
+[MantleRenderer] Logical device created with graphics queue
+[MantleRenderer] Command pool created
+[MantleRenderer] Surface created (headless mode)
+[MantleRenderer] Swapchain created: 1024x768 (headless mode)
+[MantleRenderer] Created 2 image views
+[MantleRenderer] Render pass created (Phase 5b)
+[MantleRenderer] Created 2 framebuffers
+[MantleRenderer] Pipeline layout created (descriptor sets: 0)
+[MantleRenderer] Graphics pipeline created (Phase 5b)
+[MantleRenderer] Phase 5g: CreateQuadGeometry() - quad vertex buffer (64 bytes) + index buffer (24 bytes)
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreateInstanceBuffer() - instance data buffer (245760 bytes for 4096 sprites)
+[MantleRenderer] Phase 5h: CreateStagingInstanceBuffer() - host-accessible staging buffer (245760 bytes)
+[MantleRenderer] Phase 5g: CreateDescriptorSets() - layout + pool (max 256 textures)
+[MantleRenderer] Phase 5g: CreateTextureSampler() - linear filtering texture sampler
+[MantleRenderer ERROR] WARNING: Memory type 0 doesn't have requested properties
+[MantleRenderer] Phase 5g: CreatePlaceholderTexture() - 1x1 white texture created
+[MantleRenderer] Allocated 2 command buffers (Phase 5c)
+[MantleRenderer] Render fence created (Phase 5c)
+[MantleRenderer] Vulkan initialized successfully
+[MantleRenderer] Vulkan shutdown complete
+[MantleRenderer] OpenGL renderer destroyed
+[       OK ] AllEnginesIntegrationTest.RenderEngineFactory (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.AllEnginesWorkTogether
+[       OK ] AllEnginesIntegrationTest.AllEnginesWorkTogether (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.ModuleRegistrationOrder
+[       OK ] AllEnginesIntegrationTest.ModuleRegistrationOrder (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.InputMultiKeyTracking
+[       OK ] AllEnginesIntegrationTest.InputMultiKeyTracking (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.PhysicsMultipleBodies
+[       OK ] AllEnginesIntegrationTest.PhysicsMultipleBodies (0 ms)
+[ RUN      ] AllEnginesIntegrationTest.SoundMultipleClips
+[       OK ] AllEnginesIntegrationTest.SoundMultipleClips (0 ms)
+[----------] 10 tests from AllEnginesIntegrationTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 10 tests.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"AllEnginesIntegrationTests" end time: Apr 14 00:31 +03
+"AllEnginesIntegrationTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Apr 14 00:31 +03

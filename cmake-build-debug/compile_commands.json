@@ -1,0 +1,104 @@
+[
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -o CMakeFiles/mantle_renderer.dir/core/engine.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/core/engine.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/core/engine.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/core/engine.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -o CMakeFiles/mantle_renderer.dir/runtime/runtime.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/runtime/runtime.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/runtime/runtime.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/runtime/runtime.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -o CMakeFiles/mantle_renderer.dir/modules/input/input_system.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/modules/input/input_system.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/modules/input/input_system.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/modules/input/input_system.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -o CMakeFiles/mantle_renderer.dir/modules/sound/sound_system.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/modules/sound/sound_system.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/modules/sound/sound_system.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/modules/sound/sound_system.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -o CMakeFiles/mantle_renderer.dir/modules/physics/physics_world.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/modules/physics/physics_world.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/modules/physics/physics_world.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/modules/physics/physics_world.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wno-unused-parameter -Wno-conversion -Wno-sign-conversion -o CMakeFiles/mantle_renderer.dir/vulkan_renderer.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/vulkan_renderer.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/vulkan_renderer.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/vulkan_renderer.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wno-unused-parameter -Wno-unused-variable -Wno-conversion -Wno-sign-conversion -Wno-float-conversion -o CMakeFiles/mantle_renderer.dir/opengl/opengl_renderer.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/opengl/opengl_renderer.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/opengl/opengl_renderer.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/opengl/opengl_renderer.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -o CMakeFiles/mantle_renderer.dir/renderer.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/renderer.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/renderer.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/renderer.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wno-unused-parameter -o CMakeFiles/mantle_renderer.dir/vulkan/vulkan_stub.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/vulkan/vulkan_stub.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/vulkan/vulkan_stub.cpp",
+  "output": "cpp/CMakeFiles/mantle_renderer.dir/vulkan/vulkan_stub.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest -g -std=c++23 -o CMakeFiles/test_vulkan_renderer.dir/test_vulkan_renderer.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/test_vulkan_renderer.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/test_vulkan_renderer.cpp",
+  "output": "cpp/tests/CMakeFiles/test_vulkan_renderer.dir/test_vulkan_renderer.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest -g -std=c++23 -o CMakeFiles/test_runtime.dir/test_runtime.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/test_runtime.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/test_runtime.cpp",
+  "output": "cpp/tests/CMakeFiles/test_runtime.dir/test_runtime.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest -g -std=c++23 -o CMakeFiles/test_all_engines_integration.dir/test_all_engines_integration.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/test_all_engines_integration.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/test_all_engines_integration.cpp",
+  "output": "cpp/tests/CMakeFiles/test_all_engines_integration.dir/test_all_engines_integration.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/cpp/tests",
+  "command": "/usr/bin/c++ -DUSE_GLFW3=1 -DUSE_OPENGL=1 -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/include -g -std=c++23 -o CMakeFiles/visual_comparison.dir/visual_comparison.cpp.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/visual_comparison.cpp",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cpp/tests/visual_comparison.cpp",
+  "output": "cpp/tests/CMakeFiles/visual_comparison.dir/visual_comparison.cpp.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/c++  -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock/include -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest -g -std=c++23 -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "output": "_deps/googletest-build/googlemock/CMakeFiles/gmock.dir/src/gmock-all.cc.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/c++  -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest -g -std=c++23 -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "output": "_deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/src/gmock_main.cc.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-build/googletest",
+  "command": "/usr/bin/c++  -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/include -I/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest -g -std=c++23 -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "output": "_deps/googletest-build/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o"
+},
+{
+  "directory": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-build/googletest",
+  "command": "/usr/bin/c++  -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/include -isystem /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest -g -std=c++23 -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "file": "/home/berkay/Belgeler/Geliştirme/CLionProjects/MantleEngine/cmake-build-debug/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "output": "_deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o"
+}
+]
